@@ -1,0 +1,239 @@
+openapi: 3.1.0
+info:
+  title: Sync Blogs API
+  version: 0.1.0
+  description: V1 contract for private blogging with AI collaboration and freshness updates.
+servers:
+  - url: https://api.syncblogs.local
+paths:
+  /v1/posts:
+    get:
+      summary: List posts
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [draft, published, archived]
+      responses:
+        "200":
+          description: Post list
+    post:
+      summary: Create post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePostRequest"
+      responses:
+        "201":
+          description: Created
+  /v1/posts/{postId}:
+    get:
+      summary: Get post detail
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+      responses:
+        "200":
+          description: Post detail
+    patch:
+      summary: Update post metadata
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePostRequest"
+      responses:
+        "200":
+          description: Updated
+  /v1/posts/{postId}/revisions:
+    post:
+      summary: Save revision
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRevisionRequest"
+      responses:
+        "201":
+          description: Revision saved
+  /v1/posts/{postId}/compose:
+    post:
+      summary: Generate draft options from rough thoughts
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ComposeDraftRequest"
+      responses:
+        "200":
+          description: Draft options
+  /v1/posts/{postId}/review-runs:
+    post:
+      summary: Trigger persona feedback run
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateReviewRunRequest"
+      responses:
+        "202":
+          description: Run accepted
+  /v1/review-runs/{runId}:
+    get:
+      summary: Get review run status and results
+      parameters:
+        - $ref: "#/components/parameters/RunId"
+      responses:
+        "200":
+          description: Run detail
+  /v1/posts/{postId}/publish:
+    post:
+      summary: Publish post
+      parameters:
+        - $ref: "#/components/parameters/PostId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublishPostRequest"
+      responses:
+        "200":
+          description: Published
+  /v1/freshness/updates:
+    get:
+      summary: List freshness update suggestions
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [needs_review, approved, dismissed, snoozed]
+      responses:
+        "200":
+          description: Updates list
+  /v1/freshness/updates/{updateId}/decision:
+    post:
+      summary: Apply decision for freshness update
+      parameters:
+        - $ref: "#/components/parameters/UpdateId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FreshnessDecisionRequest"
+      responses:
+        "200":
+          description: Decision saved
+components:
+  parameters:
+    PostId:
+      in: path
+      name: postId
+      required: true
+      schema:
+        type: string
+        format: uuid
+    RunId:
+      in: path
+      name: runId
+      required: true
+      schema:
+        type: string
+        format: uuid
+    UpdateId:
+      in: path
+      name: updateId
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    CreatePostRequest:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+    UpdatePostRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [draft, published, archived]
+    CreateRevisionRequest:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+        source:
+          type: string
+          enum: [manual, generated, imported]
+    CreateReviewRunRequest:
+      type: object
+      properties:
+        intensity:
+          type: string
+          enum: [gentle, balanced, rigorous]
+        personaIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+    ComposeDraftRequest:
+      type: object
+      required: [roughInput]
+      properties:
+        roughInput:
+          type: string
+        mode:
+          type: string
+          enum: [argument, narrative, brief]
+        includeStyleProfile:
+          type: boolean
+          default: true
+    PublishPostRequest:
+      type: object
+      required: [visibility]
+      properties:
+        visibility:
+          type: string
+          enum: [private, public]
+        monitorFreshness:
+          type: boolean
+          default: true
+    FreshnessDecisionRequest:
+      type: object
+      required: [decision]
+      properties:
+        decision:
+          type: string
+          enum: [approve_notice, approve_addendum, open_revision, dismiss, snooze]
+        note:
+          type: string

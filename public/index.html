@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sync Blogs</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <h1>Sync Blogs</h1>
+          <p>Private by default</p>
+        </div>
+        <button id="new-post-btn" class="btn btn-primary full">New Draft</button>
+        <div class="tabs">
+          <button id="tab-write" class="tab active">Write</button>
+          <button id="tab-updates" class="tab">Updates</button>
+        </div>
+        <div id="post-list" class="post-list"></div>
+      </aside>
+
+      <main class="main">
+        <section id="write-view" class="view">
+          <header class="topbar">
+            <input id="title-input" class="title-input" placeholder="Untitled draft" />
+            <div class="actions">
+              <button id="save-btn" class="btn">Save</button>
+              <button id="review-btn" class="btn">Review</button>
+              <button id="publish-private-btn" class="btn">Publish Private</button>
+              <button id="publish-public-btn" class="btn btn-primary">Publish Public</button>
+            </div>
+          </header>
+
+          <section class="compose-panel panel">
+            <div class="panel-header">
+              <h2>Start from thoughts</h2>
+              <select id="compose-mode">
+                <option value="">All draft modes</option>
+                <option value="argument">Argument</option>
+                <option value="narrative">Narrative</option>
+                <option value="brief">Brief</option>
+              </select>
+            </div>
+            <textarea
+              id="rough-input"
+              class="rough-input"
+              placeholder="Drop messy thoughts here. You can paste bullets, fragments, or rough notes."
+            ></textarea>
+            <div class="panel-actions">
+              <button id="compose-btn" class="btn">Generate Draft Options</button>
+            </div>
+            <div id="compose-results" class="compose-results"></div>
+          </section>
+
+          <section class="editor-wrap panel">
+            <textarea id="content-input" class="content-input" placeholder="Write here..."></textarea>
+          </section>
+        </section>
+
+        <section id="updates-view" class="view hidden">
+          <header class="updates-header">
+            <h2>Freshness Queue</h2>
+            <div class="actions">
+              <button id="scan-current-btn" class="btn">Scan Current Post</button>
+              <button id="refresh-updates-btn" class="btn">Refresh Queue</button>
+            </div>
+          </header>
+          <div id="updates-list" class="updates-list"></div>
+        </section>
+      </main>
+
+      <aside class="feedback">
+        <div class="feedback-header">
+          <h2>AI Collaboration</h2>
+          <select id="intensity-select">
+            <option value="gentle">Gentle</option>
+            <option value="balanced" selected>Balanced</option>
+            <option value="rigorous">Rigorous</option>
+          </select>
+        </div>
+        <div id="review-summary" class="summary-card">
+          Trigger a review to see prioritized feedback.
+        </div>
+        <div id="feedback-items" class="feedback-items"></div>
+        <div class="watchlist panel">
+          <h3>Version Watchlist</h3>
+          <p>Used by freshness scans (example: `codex: 5.3`).</p>
+          <textarea id="watchlist-input" class="watchlist-input"></textarea>
+          <button id="save-watchlist-btn" class="btn full">Save Watchlist</button>
+        </div>
+      </aside>
+    </div>
+    <div id="toast" class="toast hidden"></div>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
