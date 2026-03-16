@@ -1,3 +1,4 @@
+
 import Anthropic from "@anthropic-ai/sdk";
 import type { ToolUnion } from "@anthropic-ai/sdk/resources/messages/messages";
 import { parseJsonResponse } from "../lib/json.js";
@@ -101,11 +102,64 @@ function buildWebSearchTools(): ToolUnion[] {
   ];
 }
 
+export interface ClarifyingQuestion {
+  id: string;
+  question: string;
+  options: string[];
+  allowCustom: boolean;
+}
+
+export async function generateClarifyingQuestions(input: {
+  roughInput: string;
+  writingProfile?: Record<string, unknown>;
+}): Promise<ClarifyingQuestion[]> {
+  const { model } = requireAnthropicConfig();
+  const client = buildClient();
+
+  console.log(`[clarify] Generating clarifying questions with model ${model}`);
+  const startTime = Date.now();
+
+  const profileContext = input.writingProfile && Object.keys(input.writingProfile).length > 0
+    ? `\n\nThe writer's profile:\n${JSON.stringify(input.writingProfile, null, 2)}`
+    : "";
+
+  const response = await createMessageWithContinuation(client, {
+    model,
+    max_tokens: 1200,
+    temperature: 0.6,
+    system: [
+      "You generate 2-4 targeted clarifying questions before turning rough notes into a draft.",
+      "Each question should help close ambiguity gaps that would otherwise produce a generic draft.",
+      "Each question must have 2-4 suggested answer options that are specific and useful.",
+      "Options should sound natural and human — not yes/no, not generic.",
+      "Never ask something already inferable from the rough notes or the writing profile.",
+      "Prioritize questions about: intended angle/argument, target audience for THIS piece, tone of THIS piece, desired length, whether to include personal experience, specific examples to include.",
+      "Return strict JSON only.",
+      'Required shape: {"questions":[{"id":"q1","question":"string","options":["string","string"],"allowCustom":true}]}',
+      "Maximum 4 questions. Only include questions that would meaningfully change the output.",
+    ].join("\n"),
+    messages: [
+      {
+        role: "user",
+        content: `Raw notes from the writer:\n${input.roughInput}${profileContext}`,
+      },
+    ],
+  });
+
+  const elapsed = Date.now() - startTime;
+  console.log(`[clarify] Anthropic responded in ${elapsed}ms`);
+
+  const parsed = parseJsonResponse<{ questions: ClarifyingQuestion[] }>(readTextFromMessage(response));
+  console.log(`[clarify] Generated ${parsed.questions.length} clarifying question(s)`);
+  return parsed.questions;
+}
+
 export async function composeWithAnthropic(input: {
   title: string;
   roughInput: string;
   mode?: "argument" | "narrative" | "brief";
-  voiceProfile?: Record<string, string>;
+  writingProfile?: Record<string, unknown>;
+  clarifyingAnswers?: Record<string, string>;
 }): Promise<DraftOptionResult[]> {
   const { model } = requireAnthropicConfig();
   const client = buildClient();
@@ -113,29 +167,55 @@ export async function composeWithAnthropic(input: {
   console.log(`[compose] Starting draft generation for "${input.title}" with model ${model}`);
   const startTime = Date.now();
 
-  // Build voice profile instructions if available
-  const voiceLines: string[] = [];
-  if (input.voiceProfile && Object.keys(input.voiceProfile).length > 0) {
-    voiceLines.push("The writer has described their voice and preferences:");
-    for (const [key, value] of Object.entries(input.voiceProfile)) {
-      if (value) voiceLines.push(`- ${key}: ${value}`);
+  // Build writing profile instructions
+  const profileLines: string[] = [];
+  if (input.writingProfile && Object.keys(input.writingProfile).length > 0) {
+    profileLines.push("The writer's profile is:");
+    profileLines.push(JSON.stringify(input.writingProfile, null, 2));
+    profileLines.push("");
+    profileLines.push("Instructions based on profile:");
+    profileLines.push("- Write in the user's voice, not a generic AI voice");
+    profileLines.push("- Follow their formatting habits (em-dashes, capitalization style, sentence case headers, etc.)");
+    profileLines.push("- Match their preferred sentence style and structure");
+    profileLines.push("- Use the hook style they prefer");
+    profileLines.push("- Write for their stated destination (blog, LinkedIn, etc.)");
+    profileLines.push("- Target their preferred article length unless the clarifying answers suggest otherwise");
+  }
+
+  // Build clarifying answers context
+  const clarifyLines: string[] = [];
+  if (input.clarifyingAnswers && Object.keys(input.clarifyingAnswers).length > 0) {
+    clarifyLines.push("Clarifying answers from the writer for this specific piece:");
+    for (const [question, answer] of Object.entries(input.clarifyingAnswers)) {
+      if (answer) clarifyLines.push(`- ${question}: ${answer}`);
     }
-    voiceLines.push("Match this voice closely. The output should sound like this specific person, not like generic AI writing.");
+  } else {
+    clarifyLines.push("Clarifying answers: None provided.");
   }
 
   const prompt = [
-    "You are helping a writer turn rough thoughts into polished but human writing.",
+    "You are a writing assistant that transforms raw, unpolished notes into coherent, well-written articles.",
+    "",
+    ...profileLines,
+    "",
+    ...clarifyLines,
+    "",
     "Return valid JSON only.",
     "The JSON must be an object with key `options`, where `options` is an array of 1-3 objects.",
     "Each option object must have: `mode`, `titleSuggestion`, `draft`.",
     "The `draft` field should NOT include the title — it should start with the first paragraph of the body.",
     "The three supported modes are `argument`, `narrative`, and `brief`.",
-    "Avoid generic AI tone, filler, corporate cadence, and em-dash overuse.",
+    "Do NOT add filler phrases like 'In conclusion' or 'It's worth noting that'.",
+    "Do NOT start sentences with 'Delve' or 'In today's world'.",
+    "Do NOT over-explain. Trust the reader.",
+    "If the writer writes opinionated content, take a stance — don't hedge.",
+    "Use markdown formatting: headers with ##, bold for key terms, em-dashes where appropriate based on profile.",
+    "Avoid generic AI tone, filler, corporate cadence.",
     "Preserve specificity and natural phrasing.",
-    ...voiceLines,
     input.mode ? `Only return the requested mode: ${input.mode}.` : "Return all three modes.",
     `Existing title context: ${input.title || "Untitled draft"}`,
-    "Rough thoughts:",
+    "",
+    "Raw thoughts from the writer:",
     input.roughInput,
   ].join("\n");
 

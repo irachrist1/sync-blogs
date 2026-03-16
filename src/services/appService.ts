@@ -19,8 +19,21 @@ type ReviewAction = "open" | "accepted" | "dismissed" | "pinned";
 type FreshnessStatus = "needs_review" | "approved" | "dismissed" | "snoozed";
 type SuggestedAction = "notice" | "addendum" | "revision";
 
+export interface DraftProgress {
+  roughInput?: string;
+  clarifyingQuestions?: Array<{
+    id: string;
+    question: string;
+    options: string[];
+    allowCustom?: boolean;
+  }>;
+  clarifyingAnswers?: Record<string, string | string[]>;
+  lastSavedAt?: string;
+}
+
 export interface PostRecord {
   id: string;
+  userId: string;
   title: string;
   status: PostStatus;
   visibility: Visibility;
@@ -29,6 +42,7 @@ export interface PostRecord {
   publishedAt?: string;
   tags: string[];
   monitorFreshness: boolean;
+  draftProgress?: DraftProgress;
 }
 
 export interface RevisionRecord {
@@ -87,7 +101,6 @@ interface StoreState {
   freshnessUpdates: FreshnessUpdateRecord[];
   settings: {
     versionWatchlist: Record<string, string>;
-    voiceProfile: Record<string, string>;
   };
 }
 
@@ -101,7 +114,6 @@ const DEFAULT_STORE: StoreState = {
     versionWatchlist: {
       codex: "5.3",
     },
-    voiceProfile: {},
   },
 };
 
@@ -165,15 +177,18 @@ export class AppService {
     writeFileSync(this.storePath, JSON.stringify(this.state, null, 2), "utf8");
   }
 
-  listPosts(status?: PostStatus): PostRecord[] {
-    const rows = status ? this.state.posts.filter((p) => p.status === status) : this.state.posts;
+  listPosts(userId: string, status?: PostStatus): PostRecord[] {
+    const rows = this.state.posts.filter(
+      (p) => p.userId === userId && (!status || p.status === status)
+    );
     return [...rows].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   }
 
-  createPost(title: string): PostRecord {
+  createPost(userId: string, title: string): PostRecord {
     const now = safeNow();
     const post: PostRecord = {
       id: randomUUID(),
+      userId,
       title,
       status: "draft",
       visibility: "private",
@@ -192,6 +207,19 @@ export class AppService {
     if (!post) return null;
     const latestRevision = this.getLatestRevision(postId);
     return { post, latestRevision };
+  }
+
+  saveDraftProgress(postId: string, progress: DraftProgress): PostRecord | null {
+    const post = this.state.posts.find((p) => p.id === postId);
+    if (!post) return null;
+    post.draftProgress = {
+      ...post.draftProgress,
+      ...progress,
+      lastSavedAt: safeNow(),
+    };
+    post.updatedAt = safeNow();
+    this.persist();
+    return post;
   }
 
   updatePost(
@@ -240,6 +268,8 @@ export class AppService {
     postId: string,
     roughInput: string,
     mode?: "argument" | "narrative" | "brief",
+    writingProfile?: Record<string, unknown>,
+    clarifyingAnswers?: Record<string, string>,
   ): Promise<RevisionRecord[] | null> {
     const post = this.state.posts.find((p) => p.id === postId);
     if (!post) return null;
@@ -249,7 +279,8 @@ export class AppService {
       title: post.title,
       roughInput,
       mode,
-      voiceProfile: this.state.settings.voiceProfile,
+      writingProfile,
+      clarifyingAnswers,
     });
     const created: RevisionRecord[] = [];
     for (const option of options) {
@@ -459,18 +490,6 @@ export class AppService {
       normalized[cleanKey] = cleanValue;
     }
     this.state.settings.versionWatchlist = normalized;
-    this.persist();
-    return this.state.settings;
-  }
-
-  updateVoiceProfile(voiceProfile: Record<string, string>): StoreState["settings"] {
-    const cleaned: Record<string, string> = {};
-    for (const [key, value] of Object.entries(voiceProfile)) {
-      const cleanKey = String(key).trim();
-      const cleanValue = String(value).trim();
-      if (cleanKey) cleaned[cleanKey] = cleanValue;
-    }
-    this.state.settings.voiceProfile = cleaned;
     this.persist();
     return this.state.settings;
   }

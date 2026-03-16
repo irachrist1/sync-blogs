@@ -10,13 +10,14 @@ test("AppService creates, revises, and publishes a post", async () => {
 
   try {
     const service = new AppService(join(dir, "store.json"));
-    const post = service.createPost("Test draft");
+    const testUserId = "test-user-001";
+    const post = service.createPost(testUserId, "Test draft");
     const revision = service.saveRevision(post.id, "hello world");
     const published = service.publishPost(post.id, "public", true);
 
     assert.ok(revision);
     assert.equal(published?.status, "published");
-    assert.equal(service.listPosts().length, 1);
+    assert.equal(service.listPosts(testUserId).length, 1);
     assert.equal(service.getPost(post.id)?.latestRevision?.content, "hello world");
   } finally {
     rmSync(dir, { recursive: true, force: true });

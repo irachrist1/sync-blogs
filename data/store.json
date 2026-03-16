@@ -20,6 +20,49 @@
       "updatedAt": "2026-03-16T20:14:27.890Z",
       "tags": [],
       "monitorFreshness": true
+    },
+    {
+      "id": "687bc083-29c4-4d04-9532-5c00466aa535",
+      "title": "Two Years Is a Long Time in AI",
+      "status": "draft",
+      "visibility": "private",
+      "createdAt": "2026-03-16T20:40:51.380Z",
+      "updatedAt": "2026-03-16T20:42:31.899Z",
+      "tags": [],
+      "monitorFreshness": true
+    },
+    {
+      "id": "5cef5ea7-85f6-41c0-ac15-57da38c4d9e4",
+      "title": "Untitled",
+      "status": "draft",
+      "visibility": "private",
+      "createdAt": "2026-03-16T20:44:07.186Z",
+      "updatedAt": "2026-03-16T20:44:07.186Z",
+      "tags": [],
+      "monitorFreshness": true
+    },
+    {
+      "id": "fbc255d3-d6a9-4529-af1a-966f9e8c3124",
+      "userId": "41b91105-d427-492b-af05-f60ec585d54f",
+      "title": "Updated Title",
+      "status": "published",
+      "visibility": "private",
+      "createdAt": "2026-03-16T21:15:43.011Z",
+      "updatedAt": "2026-03-16T21:21:19.289Z",
+      "tags": [],
+      "monitorFreshness": true,
+      "publishedAt": "2026-03-16T21:21:19.289Z"
+    },
+    {
+      "id": "c7ed177d-bf81-4e3b-b98f-a303379d47a0",
+      "userId": "6ac5aba8-a757-47a6-995d-c6bdae392f82",
+      "title": "Untitled",
+      "status": "draft",
+      "visibility": "private",
+      "createdAt": "2026-03-16T21:58:29.043Z",
+      "updatedAt": "2026-03-16T22:09:29.348Z",
+      "tags": [],
+      "monitorFreshness": true
     }
   ],
   "revisions": [
@@ -76,15 +119,220 @@
       "contentHash": "8837880aa22223cbb8a4a2a41bc260ed062ec6f3b3ee6dd158a4bd822cebff44",
       "source": "manual",
       "createdAt": "2026-03-16T20:14:27.890Z"
+    },
+    {
+      "id": "4ee95951-f490-497e-876f-b630d7223091",
+      "postId": "687bc083-29c4-4d04-9532-5c00466aa535",
+      "revisionNumber": 1,
+      "content": "Most people still think about AI the way they thought about it in 2023 — a fancy autocomplete, a productivity shortcut, something that writes your emails. That framing is now dangerously out of date. What we have in 2026 is not a better version of that thing. It is a categorically different kind of tool, and the gap between public understanding and actual capability has never been wider.\n\nTake GPT-5.4 as a reference point. The things you can do with it today would have looked like science fiction two years ago. Sustained multi-step reasoning across long contexts. Autonomous code generation that doesn't just write functions but architects entire systems, catches its own bugs, and iterates without hand-holding. The model can hold a project in its head in a way that earlier versions simply couldn't. Development work, in particular, has been transformed. Not augmented — transformed. The question for a lot of engineering teams is no longer \"how does AI help us write code\" but \"what does a human engineer actually need to do anymore.\"\n\nThat shift in the question is important. It signals that we've crossed some threshold, even if we can't agree on exactly where it is. The road to AGI — artificial general intelligence — used to feel like a distant theoretical problem. Now it feels like a planning horizon. ASI, artificial superintelligence, still sounds abstract, but the distance between here and there is compressing faster than most institutions are prepared to handle.\n\nMy predictions for the next few years are less about specific capabilities and more about structural change. The first wave already happened: AI as a tool you use. The second wave, which we're in now, is AI as a collaborator that operates with partial autonomy. The third wave — and I think we see the edges of it within three years — is AI as an actor. Not a tool you pick up and put down, but something that runs processes, makes decisions within defined scopes, and produces outcomes without a human in the loop for every step. That is not a reason to panic. But it is a reason to think clearly, right now, about what we actually want from these systems and what guardrails make sense before they're harder to install.",
+      "contentHash": "08c635ada6b2c7e12f28815015b1a4443f51069abed813b6c6f26fcfbc4eccea",
+      "source": "generated",
+      "createdAt": "2026-03-16T20:41:44.873Z",
+      "titleSuggestion": "We Are Not Ready for What AI Is About to Become"
+    },
+    {
+      "id": "6f59f4d4-dd6e-4e76-bf06-05ab4496fa0a",
+      "postId": "687bc083-29c4-4d04-9532-5c00466aa535",
+      "revisionNumber": 2,
+      "content": "I remember the feeling in late 2024 of being genuinely impressed when a model could hold a coherent conversation for more than a few exchanges without losing the thread. That was the bar. That was what we were excited about.\n\nIt's strange to look back on that now.\n\nSomewhere between then and now, the thing changed. Not incrementally, the way software usually improves — a bit faster, a bit more accurate — but in the way that a student who has been struggling suddenly just gets it. The reasoning got longer. The context got deeper. The outputs stopped feeling like confident guesses and started feeling like actual thinking. I don't know exactly when I noticed the shift, but I remember the first time I used GPT-5.4 for a real development task and didn't feel like I was fighting it. I just described what I needed, and it built it. Not a snippet. A working system. And when something was wrong, it found it.\n\nThat experience is hard to explain to someone who hasn't had it. It's not that the tool got better. It's that the nature of the interaction changed. I stopped being a person who uses an AI and started being a person who works with one. That's a small linguistic difference with enormous practical implications.\n\nNow I find myself thinking about where this goes. The honest answer is that I don't think anyone knows with precision, but the direction is clear enough to make reasonable guesses. AGI — the point where these systems can do essentially anything a knowledge worker can do — is no longer a philosophical thought experiment. It's a product roadmap. ASI, where they exceed human capability across the board, is further out, but \"further out\" now means years, not generations. The next few years are going to involve a lot of people updating their mental models very quickly, and the people who do that updating early are going to be in a much better position than the ones who wait until it's impossible to ignore.",
+      "contentHash": "c96d2cb64f96272f4790427bec128c93f17a3796f9437bb91b43ef1a0285b83a",
+      "source": "generated",
+      "createdAt": "2026-03-16T20:41:44.874Z",
+      "titleSuggestion": "Two Years Is a Long Time in AI"
+    },
+    {
+      "id": "cf47d32f-e476-4bbf-9303-f9bea9ef5712",
+      "postId": "687bc083-29c4-4d04-9532-5c00466aa535",
+      "revisionNumber": 3,
+      "content": "AI in 2026 is not the same thing it was in 2024. The capabilities have shifted enough that comparisons to two years ago feel almost unfair.\n\nThe clearest example is in software development. GPT-5.4 and models at that tier can now architect and build systems end-to-end, not just assist. They reason across long contexts, catch their own errors, and iterate. The human role in a lot of development workflows has moved from doing the work to directing it. That's a real change, and it happened fast.\n\nMore broadly, what's different now is the quality of reasoning and the length of useful context. Earlier models were good at tasks. Current models are capable of something closer to projects. That distinction matters for how you actually use them and what you can expect from them.\n\nOn the trajectory: AGI feels less like a distant milestone and more like a near-term planning assumption. ASI is still further out, but the gap is shrinking faster than most forecasts from even three years ago would have suggested. My rough read on the next few years is that we move from AI as a tool you use, to AI as a collaborator with partial autonomy, to AI as an actor that runs processes and produces outcomes without constant human input. Each of those phases requires different thinking about how to work with these systems and what constraints make sense. The time to think about that is before the transition, not after.",
+      "contentHash": "4fbfda91981a6cb7f7538032c04eae7a31c2da6e7370accbab7ba06546fddcb6",
+      "source": "generated",
+      "createdAt": "2026-03-16T20:41:44.874Z",
+      "titleSuggestion": "AI in 2026: A Quick State of Play"
+    },
+    {
+      "id": "9aee81f1-9563-4cb4-aba9-406653d1f212",
+      "postId": "687bc083-29c4-4d04-9532-5c00466aa535",
+      "revisionNumber": 4,
+      "content": "Most people still think about AI the way they thought about it in 2023 — a fancy autocomplete, a productivity shortcut, something that writes your emails. That framing is now dangerously out of date. What we have in 2026 is not a better version of that thing. It is a categorically different kind of tool, and the gap between public understanding and actual capability has never been wider.\n\nTake GPT-5.4 as a reference point. The things you can do with it today would have looked like science fiction two years ago. Sustained multi-step reasoning across long contexts. Autonomous code generation that doesn't just write functions but architects entire systems, catches its own bugs, and iterates without hand-holding. The model can hold a project in its head in a way that earlier versions simply couldn't. Development work, in particular, has been transformed. Not augmented — transformed. The question for a lot of engineering teams is no longer \"how does AI help us write code\" but \"what does a human engineer actually need to do anymore.\"\n\nThat shift in the question is important. It signals that we've crossed some threshold, even if we can't agree on exactly where it is. The road to AGI — artificial general intelligence — used to feel like a distant theoretical problem. Now it feels like a planning horizon. ASI, artificial superintelligence, still sounds abstract, but the distance between here and there is compressing faster than most institutions are prepared to handle.\n\nMy predictions for the next few years are less about specific capabilities and more about structural change. The first wave already happened: AI as a tool you use. The second wave, which we're in now, is AI as a collaborator that operates with partial autonomy. The third wave — and I think we see the edges of it within three years — is AI as an actor. Not a tool you pick up and put down, but something that runs processes, makes decisions within defined scopes, and produces outcomes without a human in the loop for every step. That is not a reason to panic. But it is a reason to think clearly, right now, about what we actually want from these systems and what guardrails make sense before they're harder to install.",
+      "contentHash": "08c635ada6b2c7e12f28815015b1a4443f51069abed813b6c6f26fcfbc4eccea",
+      "source": "generated",
+      "createdAt": "2026-03-16T20:42:12.099Z"
+    },
+    {
+      "id": "06921c18-7906-4e96-b34e-25c3373bda66",
+      "postId": "687bc083-29c4-4d04-9532-5c00466aa535",
+      "revisionNumber": 5,
+      "content": "AI in 2026 is not the same thing it was in 2024. The capabilities have shifted enough that comparisons to two years ago feel almost unfair.\n\nThe clearest example is in software development. GPT-5.4 and models at that tier can now architect and build systems end-to-end, not just assist. They reason across long contexts, catch their own errors, and iterate. The human role in a lot of development workflows has moved from doing the work to directing it. That's a real change, and it happened fast.\n\nMore broadly, what's different now is the quality of reasoning and the length of useful context. Earlier models were good at tasks. Current models are capable of something closer to projects. That distinction matters for how you actually use them and what you can expect from them.\n\nOn the trajectory: AGI feels less like a distant milestone and more like a near-term planning assumption. ASI is still further out, but the gap is shrinking faster than most forecasts from even three years ago would have suggested. My rough read on the next few years is that we move from AI as a tool you use, to AI as a collaborator with partial autonomy, to AI as an actor that runs processes and produces outcomes without constant human input. Each of those phases requires different thinking about how to work with these systems and what constraints make sense. The time to think about that is before the transition, not after.",
+      "contentHash": "4fbfda91981a6cb7f7538032c04eae7a31c2da6e7370accbab7ba06546fddcb6",
+      "source": "generated",
+      "createdAt": "2026-03-16T20:42:26.510Z"
+    },
+    {
+      "id": "61f154fb-ad5e-45d8-b17a-4f2651abb598",
+      "postId": "687bc083-29c4-4d04-9532-5c00466aa535",
+      "revisionNumber": 6,
+      "content": "I remember the feeling in late 2024 of being genuinely impressed when a model could hold a coherent conversation for more than a few exchanges without losing the thread. That was the bar. That was what we were excited about.\n\nIt's strange to look back on that now.\n\nSomewhere between then and now, the thing changed. Not incrementally, the way software usually improves — a bit faster, a bit more accurate — but in the way that a student who has been struggling suddenly just gets it. The reasoning got longer. The context got deeper. The outputs stopped feeling like confident guesses and started feeling like actual thinking. I don't know exactly when I noticed the shift, but I remember the first time I used GPT-5.4 for a real development task and didn't feel like I was fighting it. I just described what I needed, and it built it. Not a snippet. A working system. And when something was wrong, it found it.\n\nThat experience is hard to explain to someone who hasn't had it. It's not that the tool got better. It's that the nature of the interaction changed. I stopped being a person who uses an AI and started being a person who works with one. That's a small linguistic difference with enormous practical implications.\n\nNow I find myself thinking about where this goes. The honest answer is that I don't think anyone knows with precision, but the direction is clear enough to make reasonable guesses. AGI — the point where these systems can do essentially anything a knowledge worker can do — is no longer a philosophical thought experiment. It's a product roadmap. ASI, where they exceed human capability across the board, is further out, but \"further out\" now means years, not generations. The next few years are going to involve a lot of people updating their mental models very quickly, and the people who do that updating early are going to be in a much better position than the ones who wait until it's impossible to ignore.",
+      "contentHash": "c96d2cb64f96272f4790427bec128c93f17a3796f9437bb91b43ef1a0285b83a",
+      "source": "generated",
+      "createdAt": "2026-03-16T20:42:31.899Z"
+    },
+    {
+      "id": "2ebbe74b-d7c1-43df-b52c-ae6e9b615939",
+      "postId": "fbc255d3-d6a9-4529-af1a-966f9e8c3124",
+      "revisionNumber": 1,
+      "content": "This is a test draft about AI writing tools.",
+      "contentHash": "87d02d19388430d2a4fb044998478a1db7c4c69eee45b23cf2594474b73859f7",
+      "source": "manual",
+      "createdAt": "2026-03-16T21:21:19.253Z"
+    },
+    {
+      "id": "957622db-7d6b-4885-82cd-a5901d66ea45",
+      "postId": "c7ed177d-bf81-4e3b-b98f-a303379d47a0",
+      "revisionNumber": 1,
+      "content": "The gap between 2024 and 2026 isn't two years — it's a regime change. The conversations we were having about AI \"potential\" have been replaced by conversations about AI **output**, and most people still haven't recalibrated their mental models to match what's actually happening.\n\n## What Changed\n\nThe clearest marker is what **GPT-5.4** and its contemporaries can now do that felt like science fiction 18 months ago. Sustained, multi-step reasoning across long contexts. Code generation that doesn't just autocomplete — it architects. The ability to hold a complex software project in working memory, identify failure points, and ship fixes without a human in the loop. Development, as a discipline, has been structurally disrupted. Not augmented. Disrupted.\n\nThis isn't about replacing junior developers. Senior engineers are now orchestrating fleets of AI agents that do in hours what used to take sprint cycles. The leverage has shifted so dramatically that a single person with the right tooling can output what a team of ten produced in 2024.\n\n## The AGI Question Is No Longer Theoretical\n\nWe're not at **AGI** yet — but the goalposts have moved so many times that the definition is doing most of the work now. What we have are systems that generalize across domains, self-correct, and improve their own outputs through iteration. If that's not AGI, it's close enough that the distinction barely matters for practical decision-making.\n\n**ASI** remains further out, but the trajectory is no longer speculative. The question isn't *if* — it's whether the institutions, incentives, and infrastructure around these systems can keep pace with the capability curve.\n\n## What Comes Next\n\nThe next two to three years will be defined by **agentic systems** becoming the default interface for knowledge work. The prompt-response model is already feeling dated. What replaces it is persistent AI that operates across time, manages its own task queues, and integrates directly into the systems where work actually happens.\n\nThe companies that treat this as a productivity tool will be outcompeted by the ones that treat it as a **structural reorganization** of how work gets done. The former are optimizing a horse-drawn carriage. The latter are building roads.",
+      "contentHash": "9872c6bc64420921350fed29c0563705272c25803949a8d18c4d26d218f6f613",
+      "source": "generated",
+      "createdAt": "2026-03-16T22:09:21.094Z",
+      "titleSuggestion": "We're Not Ready to Admit How Fast This Is Moving"
+    },
+    {
+      "id": "2423f0a9-0edb-4155-b383-9d427a5abea9",
+      "postId": "c7ed177d-bf81-4e3b-b98f-a303379d47a0",
+      "revisionNumber": 2,
+      "content": "Sometime in early 2025, the feeling shifted. It wasn't one announcement or one model drop — it was the accumulation of small moments where AI stopped feeling like a tool you used and started feeling like a collaborator you managed.\n\nI remember the kinds of things we were doing with AI in 2024. Drafting, summarizing, rubber-ducking on code problems. Useful, genuinely — but bounded. You could feel the ceiling. The model would lose the thread, hallucinate a library that didn't exist, forget what you'd said three messages ago. The limitations were as present as the capabilities.\n\n## The Ceiling Lifted\n\nWhat **GPT-5.4** and the models around it represent isn't just better benchmarks. It's the removal of the friction that kept AI in an assistive role. Long-context coherence means a model can hold an entire codebase in view. Reasoning chains mean it can work through ambiguous problems without collapsing into confident nonsense. Agentic frameworks mean it can take action, check its own work, and iterate — without a human babysitting every step.\n\nThe experience of **AI-assisted development** in 2026 is almost unrecognizable from 2024. Engineers I know have stopped writing most boilerplate entirely. Some have restructured their whole workflow around directing agents rather than writing code themselves. The craft is shifting from execution to judgment.\n\n## Where This Is Going\n\nThe honest answer is that the trajectory is hard to stare at directly. Not because it's frightening — though it can be — but because the compounding is so steep that linear intuition fails you.\n\n**AGI** as a formal threshold matters less than the functional reality: we have systems that generalize, adapt, and improve. The path from here to **ASI** is contested, but it's no longer a fringe conversation. The researchers who were cautious about timelines in 2023 are quieter now.\n\nMy expectation for the next few years: the interface between humans and AI systems will continue to collapse. The explicit prompt will give way to persistent agents that know your context, your goals, your preferences — and work continuously rather than on demand. That's not a prediction that requires a leap. It's already happening at the edges.",
+      "contentHash": "2b40f9f13e552971289c1fe9c5346ec66c53342518c6e6e4496e9a1c139248be",
+      "source": "generated",
+      "createdAt": "2026-03-16T22:09:21.162Z",
+      "titleSuggestion": "Two Years That Felt Like Twenty"
+    },
+    {
+      "id": "b050f9f0-afea-417c-9d11-4741d96f7c3d",
+      "postId": "c7ed177d-bf81-4e3b-b98f-a303379d47a0",
+      "revisionNumber": 3,
+      "content": "## Where We Are\n\nThe 2024-to-2026 jump is the most significant two-year capability leap in the history of the field. **GPT-5.4** and comparable models can now sustain complex reasoning across long contexts, generate and debug production-quality code, and operate autonomously through agentic frameworks — none of which were reliably possible 18 months ago.\n\n**AI in software development** is no longer augmentation. Engineers are directing agents that handle full implementation cycles. The leverage ratio has changed permanently.\n\n## The AGI/ASI Picture\n\n- We're not at **AGI** by strict definitions — but functionally, the gap is narrow and narrowing\n- **ASI** timelines are no longer fringe; mainstream researchers have revised estimates forward\n- The more useful frame: capability is compounding faster than institutions can adapt\n\n## What the Next Few Years Look Like\n\n**Agentic systems** become the default. Prompt-response is already legacy UX. Persistent agents — operating across time, integrated into workflows, managing their own task queues — are the near-term trajectory.\n\nKnowledge work gets restructured, not just accelerated. The organizations that understand this early will have structural advantages that are very difficult to close later.\n\n**The core prediction:** by 2028, the question won't be whether AI can do your job — it'll be whether you've learned to direct the systems that can.",
+      "contentHash": "ccdf354783e134fe359a42618c6a2a8766cb7f843b0e2671d4957190277bf537",
+      "source": "generated",
+      "createdAt": "2026-03-16T22:09:21.163Z",
+      "titleSuggestion": "AI in 2026: What's Real, What's Next"
+    },
+    {
+      "id": "95ea7073-14d6-45b1-8c90-715fdd36cd18",
+      "postId": "c7ed177d-bf81-4e3b-b98f-a303379d47a0",
+      "revisionNumber": 4,
+      "content": "The gap between 2024 and 2026 is not a product cycle — it's a regime change. The models we have now don't just perform better on benchmarks; they operate in fundamentally different ways. **GPT-5.4** and its contemporaries can sustain coherent reasoning across hours of context, autonomously decompose multi-step engineering problems, and write, test, and ship production code with minimal human intervention. That last point deserves emphasis: AI hasn't just entered the development workflow — in many teams, it *is* the development workflow.\n\n## What Actually Changed\n\nThe 2024 models were impressive tools. The 2026 models are closer to **collaborators with agency**. The shift isn't raw capability in isolation — it's the combination of long-context reasoning, tool use, and the ability to operate inside agentic loops without falling apart. You can hand a well-scoped project to a model today and get back something deployable. That wasn't true two years ago, and the delta matters enormously.\n\nSoftware development is the clearest example because it's measurable. Junior dev tasks — CRUD features, test coverage, refactoring, documentation — are largely automated now. Mid-level work is being compressed. The humans still in the loop are there for judgment, architecture decisions, and the kind of ambiguity resolution that requires real-world context. That ratio is shifting fast.\n\n## The Road to AGI Is Not a Straight Line — But It's Shorter Than People Think\n\nMost mainstream discourse still treats **AGI** as a distant theoretical milestone. That framing is wrong, or at least dangerously imprecise. We don't have AGI. But we have systems that exceed human performance across a widening range of cognitive tasks, and the exceptions — genuine physical embodiment, deep causal reasoning, robust common sense in novel environments — are shrinking with each generation.\n\n**ASI** — systems that are not just broadly capable but recursively self-improving and operating beyond human comprehension — remains further out. But the honest prediction is that the distance between where we are now and AGI is measured in years, not decades. And the distance between AGI and ASI may be very short once the first threshold is crossed.\n\n## What to Expect in the Next Three Years\n\nThe near-term trajectory looks like this: continued automation of knowledge work, with software and legal and financial analysis leading the wave. Multimodal agents that operate across your entire digital environment — not just answering questions but executing tasks. A serious reckoning in enterprise hiring, particularly for roles that involve processing, summarizing, or transforming information.\n\nThe harder question isn't what AI will be able to do — it's what the economic and social structures around it will look like when capability outpaces adaptation. That's the problem nobody has a clean answer to, and it's the one that actually matters.",
+      "contentHash": "dda369ef1702a7d63bf01b9df6210b4d1ccd85a0f13b7bec73c074a1ad429e84",
+      "source": "generated",
+      "createdAt": "2026-03-16T22:09:23.978Z",
+      "titleSuggestion": "We Are Not Ready for What AI Becomes Next"
+    },
+    {
+      "id": "1d4eda8f-1486-4360-86d3-d77a12d8a99b",
+      "postId": "c7ed177d-bf81-4e3b-b98f-a303379d47a0",
+      "revisionNumber": 5,
+      "content": "There's a specific kind of disorientation that comes from watching a technology move faster than your mental model of it. I felt it in early 2024 when the models were good but still brittle — impressive in demos, unreliable in production. I feel it differently now, in 2026, because the brittleness is mostly gone and what's left is something harder to categorize.\n\nI've been trying to get my thoughts down about where we actually are — not the hype version, not the doomer version, just an honest account of what's changed, what it means, and where I think it's going.\n\n## The 2024-to-2026 Jump\n\nIf you stepped away from AI in late 2024 and came back now, the most jarring thing wouldn't be a single capability — it would be the **coherence**. Models like **GPT-5.4** don't just answer questions better. They hold context across genuinely long interactions, reason through ambiguity without hallucinating their way out of it, and operate inside complex tool environments without losing the thread.\n\nFor development specifically, the change has been structural. I've watched teams shrink their engineering headcount while shipping more. Not because they cut corners — because the model handles the parts of the job that used to require a person sitting at a keyboard for six hours. The humans are still there, but they're operating at a different altitude. Less implementation, more direction.\n\n## Where I Think This Is Going\n\nI'm not someone who throws around **AGI** casually, but I've stopped treating it as a far-future abstraction. The systems we have now aren't AGI — there are still meaningful gaps in physical reasoning, genuine novelty handling, and a few other areas. But the gaps are narrowing faster than most people expected two years ago, and the ones that remain are increasingly narrow.\n\nMy honest prediction: we see something that most serious researchers would call AGI within the next three to five years. What comes after that — **ASI**, systems that improve themselves faster than we can track — is harder to time, but the gap between AGI and ASI might be very short. That's the part that keeps me up at night, not in a catastrophizing way, but in the way that any genuinely unprecedented thing should.\n\nThe next few years will be defined less by what the models can do and more by whether our institutions, our economies, and our individual sense of purpose can adapt to a world where cognitive labor is no longer scarce.",
+      "contentHash": "3b3b1a6b9cb46fbe09df01c5cb0913a993aa6eb845a93d5d81debf02f10e141c",
+      "source": "generated",
+      "createdAt": "2026-03-16T22:09:23.979Z",
+      "titleSuggestion": "Two Years Changed Everything: A Field Report on AI in 2026"
+    },
+    {
+      "id": "3157a46b-4ff5-4076-8a07-799ad0372d2e",
+      "postId": "c7ed177d-bf81-4e3b-b98f-a303379d47a0",
+      "revisionNumber": 6,
+      "content": "**GPT-5.4** and the current generation of models represent a genuine step-change from 2024 — not incremental improvement. Long-context coherence, agentic tool use, and autonomous code generation have moved from demos to production reality. AI-driven development is no longer a workflow enhancement; for many teams, it's the primary workflow.\n\n## What's Actually Different Now\n\n- **Agentic loops work.** Models can operate across multi-step tasks without collapsing into incoherence.\n- **Code generation is production-grade.** Junior and mid-level dev tasks are largely automated. Human engineers are moving up the abstraction stack.\n- **Reasoning is stickier.** The hallucination problem hasn't vanished, but it's been compressed enough that real work gets done.\n\n## The AGI Timeline\n\n**AGI** is not a 2040 problem. The remaining gaps — physical embodiment, robust novel-environment reasoning — are real but shrinking. A reasonable estimate puts genuine AGI within three to five years. **ASI** follows at an unknown but potentially short interval after that threshold.\n\n## Predictions for the Next Few Years\n\n1. Knowledge work automation accelerates — legal, financial, and software roles compress significantly.\n2. Multimodal agents become standard operating environment tools, not chatbots.\n3. The economic disruption question overtakes the capability question as the dominant public concern.\n4. At least one major AGI threshold moment — recognized as such in real time — occurs before 2030.\n\nThe technology is moving on a clear trajectory. The open question is whether everything built around human cognitive labor can adapt at anywhere near the same speed.",
+      "contentHash": "30634dbea17f914d7cb709314de7f5a65bf0b3b4576d504112e6acfea340d4b0",
+      "source": "generated",
+      "createdAt": "2026-03-16T22:09:23.980Z",
+      "titleSuggestion": "State of AI, 2026: What's Real, What's Next"
+    },
+    {
+      "id": "c1842801-2deb-4842-81d7-68400d9d23d4",
+      "postId": "c7ed177d-bf81-4e3b-b98f-a303379d47a0",
+      "revisionNumber": 7,
+      "content": "The gap between 2024 and 2026 isn't measured in years — it's measured in capability orders of magnitude. What GPT-5.4 can do today would have looked like science fiction eighteen months ago, and most people still haven't updated their priors accordingly.\n\n## What Actually Changed\n\nThe shift isn't just that models got smarter. It's that they became **reliable enough to own workflows**. In 2024, AI was a co-pilot. You prompted, it suggested, you fixed. In 2026, the dynamic has inverted — particularly in software development. Models now write, test, debug, and deploy code across entire feature branches with minimal human intervention. The developer's job has moved up the abstraction stack: from writing code to specifying intent.\n\nThis isn't incremental. It's a structural change in how software gets built.\n\n## The AGI Question\n\nEveryone wants a clean definition of AGI before they'll admit we're approaching it. That's a stalling tactic. **AGI isn't a threshold — it's a gradient**, and we're clearly moving along it. The meaningful question isn't 'have we crossed the line?' but 'at what point does the distinction stop mattering?'\n\nWe're close to that point. Systems that can reason across domains, hold long-horizon context, autonomously use tools, and improve their own outputs are not narrow AI by any honest definition.\n\n## ASI Is the Real Conversation\n\nOnce you accept that AGI is a gradient, ASI becomes the urgent topic — and almost nobody is treating it with the seriousness it deserves. **Artificial superintelligence isn't a sequel to AGI; it's a phase transition.** The moment a system can meaningfully improve AI research itself, the timeline compresses in ways that no roadmap can reliably model.\n\n## Predictions\n\nThe next two to three years will likely bring: autonomous AI agents handling entire business functions end-to-end, a significant contraction in entry-level knowledge work, and the first serious public debate about whether AI output should be legally distinguishable from human output. The developers who thrive won't be the ones who code fastest — they'll be the ones who can think in systems and direct AI with precision.\n\nThe skeptics will keep moving the goalposts. The rest of us should stop waiting for consensus and start building for the world that's already arriving.",
+      "contentHash": "d8de18ed725d214c10cf58cfc462b7a28330ceb7f264e5191b63e16521af44c9",
+      "source": "generated",
+      "createdAt": "2026-03-16T22:09:29.347Z",
+      "titleSuggestion": "AGI Is Closer Than the Skeptics Want to Admit"
+    },
+    {
+      "id": "ce1d1832-a187-483f-8316-a4b988db5bf2",
+      "postId": "c7ed177d-bf81-4e3b-b98f-a303379d47a0",
+      "revisionNumber": 8,
+      "content": "Sometime in late 2024, the conversation about AI was still mostly theoretical. People debated benchmarks, argued about hallucinations, and treated large language models as impressive but fundamentally limited tools. Then 2025 happened — and then 2026 — and the ground shifted under everyone's feet.\n\n## The Before and After\n\nThe clearest way to feel the gap is to sit down with **GPT-5.4** and try to remember what using GPT-4 felt like. It's like remembering dial-up internet. The current generation doesn't just answer questions better — it reasons, plans, backtracks, uses tools, writes software that works, and maintains coherent context across tasks that would have broken earlier models entirely.\n\nIn 2024, AI-assisted development meant autocomplete with ambition. In 2026, it means describing a feature and watching an agent scaffold, implement, test, and iterate on it — sometimes without a single line written by a human hand.\n\n## The Rise of the AI-Native Workflow\n\nWhat's emerged isn't just better tooling. It's a **new relationship between humans and code**. Entire startups are being built by teams of two or three people who would have needed twenty in 2023. The leverage is extraordinary — and so is the disorientation for people whose identity was built around technical skill as a scarce resource.\n\nDevelopment is the most visible frontier, but it's not the only one. Research, writing, legal analysis, financial modeling — the pattern is the same everywhere. AI isn't replacing the domain; it's compressing the time between idea and output.\n\n## Where This Goes\n\nThe honest answer is that nobody knows exactly — but the direction is unmistakable. We are somewhere on the AGI gradient, moving fast, and the next phase isn't a gradual continuation of the current one. **ASI represents a qualitative break**, not just more of the same.\n\nThe next few years will likely feel less like watching technology improve and more like watching the rules of the game change in real time. The people who adapt won't be the ones who mastered the old tools — they'll be the ones who stayed curious about the new ones.",
+      "contentHash": "1971e65f2cfff652b4208c021bcabb6e70d5bf28ee5046cf1878904cbe2e07b2",
+      "source": "generated",
+      "createdAt": "2026-03-16T22:09:29.348Z",
+      "titleSuggestion": "Two Years That Changed Everything: A Field Report on AI in 2026"
+    },
+    {
+      "id": "859cede9-f1cd-4116-b064-e7aa16f55aa9",
+      "postId": "c7ed177d-bf81-4e3b-b98f-a303379d47a0",
+      "revisionNumber": 9,
+      "content": "We are not where we were in 2024. The distance between then and now is large enough that most frameworks people use to think about AI are already outdated.\n\n## What's New and Actually Matters\n\n- **Autonomous development is real.** GPT-5.4 and its contemporaries can own significant portions of a software project — not just assist. The developer role is shifting toward direction and architecture, away from implementation.\n- **Reliability crossed a threshold.** Earlier models were impressive but brittle. Current models are consistent enough to sit inside production workflows without constant supervision.\n- **Multimodal and agentic capabilities compounded.** The combination of reasoning, tool use, and long-context handling created emergent utility that no single capability announcement fully telegraphed.\n\n## The AGI/ASI Frame\n\n**AGI is a spectrum, not a switch.** By any practical definition, current systems exhibit general reasoning across domains. The debate about whether we've 'officially' reached AGI is less useful than asking: *what can these systems do that changes how work gets done?* The answer to that is already significant and still accelerating.\n\nASI is the harder question — and the more important one. A system capable of improving AI research is a system that breaks the current pace of progress entirely.\n\n## Near-Term Predictions\n\n- Entry-level knowledge work contracts sharply within two to three years\n- AI agents take over full business functions, not just tasks\n- The developer skillset that commands a premium shifts decisively toward systems thinking and AI direction\n- Public and regulatory pressure around AI output attribution intensifies\n\nThe trajectory is clear. The only real variable is how fast.",
+      "contentHash": "745de5aa8316f9ec8adb60c656915037a2c0887e5520d7e28ac6b0f8fcafa274",
+      "source": "generated",
+      "createdAt": "2026-03-16T22:09:29.348Z"
     }
   ],
   "reviewRuns": [],
   "reviewItems": [],
-  "freshnessUpdates": [],
+  "freshnessUpdates": [
+    {
+      "id": "2543bebe-60a0-4af3-a8c3-d01254f5b69d",
+      "postId": "fbc255d3-d6a9-4529-af1a-966f9e8c3124",
+      "severity": "high",
+      "confidence": 0.85,
+      "suggestedAction": "revision",
+      "summary": "The AI writing tools landscape is evolving extremely rapidly. The draft's content is very thin and does not reference specific tools, models, or pricing — but if any such claims exist in the full version, they are at high risk of being stale. Major tools like ChatGPT, Claude, Jasper, and Writesonic have all seen significant pricing, feature, and model updates in early 2026 (e.g., Jasper now combines GPT-4.1, Claude 3.7, and Gemini; Writesonic restructured pricing in 2025; Claude now offers a 'Max' tier at $100–$200/month).",
+      "sourceLinks": [
+        "https://www.rivalflow.com/blog/ai-writing-tools",
+        "https://www.zemith.com/en/contents/best-ai-for-writing-2026",
+        "https://kindlepreneur.com/best-ai-writing-tools/"
+      ],
+      "status": "needs_review",
+      "createdAt": "2026-03-16T21:21:50.347Z"
+    },
+    {
+      "id": "3a590393-a48b-4fe6-b971-4232c4debcd3",
+      "postId": "fbc255d3-d6a9-4529-af1a-966f9e8c3124",
+      "severity": "medium",
+      "confidence": 0.78,
+      "suggestedAction": "addendum",
+      "summary": "The competitive ranking of AI writing tools has shifted notably as of early 2026. General-purpose models (ChatGPT, Claude) are now widely considered superior to many specialized tools for most writing tasks, which may contradict older framings that elevated dedicated tools like Jasper or Copy.ai as the top choices.",
+      "sourceLinks": [
+        "https://www.zemith.com/en/contents/best-ai-for-writing-2026",
+        "https://monday.com/blog/ai-agents/best-ai-for-writing/",
+        "https://www.synthesia.io/post/ai-tools"
+      ],
+      "status": "needs_review",
+      "createdAt": "2026-03-16T21:21:50.347Z"
+    },
+    {
+      "id": "fb760808-2aab-4e5e-9d87-3a0ddc9d1754",
+      "postId": "fbc255d3-d6a9-4529-af1a-966f9e8c3124",
+      "severity": "low",
+      "confidence": 0.65,
+      "suggestedAction": "addendum",
+      "summary": "The concept of 'AI writing tools' has broadened significantly by 2026 to include agentic workflows, AI Answer Engine Optimization (AEO), and multi-model orchestration. A draft that frames AI writing tools narrowly (e.g., as simple text generators) may now be contextually outdated.",
+      "sourceLinks": [
+        "https://www.eesel.ai/blog/best-ai-writing-tools",
+        "https://monday.com/blog/ai-agents/best-ai-for-writing/",
+        "https://inkshift.io/resources/ai-writing-tools-2026"
+      ],
+      "status": "needs_review",
+      "createdAt": "2026-03-16T21:21:50.347Z"
+    }
+  ],
   "settings": {
     "versionWatchlist": {
       "react": "19.0",
       "node": "22.0"
+    },
+    "voiceProfile": {
+      "tone": "conversational",
+      "genre": "essays"
     }
   }
 }
