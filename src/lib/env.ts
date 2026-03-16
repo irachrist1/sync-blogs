@@ -4,7 +4,7 @@ dotenv.config();
 
 export function getAnthropicConfig(): { apiKey: string | null; model: string } {
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim() || null;
-  const model = process.env.ANTHROPIC_MODEL?.trim() || "claude-sonnet-4-20250514";
+  const model = process.env.ANTHROPIC_MODEL?.trim() || "claude-sonnet-4-6";
 
   return { apiKey, model };
 }

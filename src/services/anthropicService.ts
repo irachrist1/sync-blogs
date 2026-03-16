@@ -60,6 +60,32 @@ function readTextFromMessage(message: Anthropic.Message): string {
     .trim();
 }
 
+async function createMessageWithContinuation(
+  client: Anthropic,
+  params: Anthropic.MessageCreateParams,
+): Promise<Anthropic.Message> {
+  let response = await client.messages.create(params);
+
+  while (response.stop_reason === "pause_turn") {
+    response = await client.messages.create({
+      model: params.model,
+      max_tokens: params.max_tokens,
+      temperature: params.temperature,
+      system: params.system,
+      tools: params.tools,
+      messages: [
+        ...params.messages,
+        {
+          role: "assistant",
+          content: response.content,
+        },
+      ],
+    });
+  }
+
+  return response;
+}
+
 function buildClient(): Anthropic {
   const { apiKey } = requireAnthropicConfig();
   return new Anthropic({ apiKey });
@@ -97,7 +123,7 @@ export async function composeWithAnthropic(input: {
     input.roughInput,
   ].join("\n");
 
-  const response = await client.messages.create({
+  const response = await createMessageWithContinuation(client, {
     model,
     max_tokens: 2200,
     temperature: 0.7,
@@ -126,11 +152,10 @@ export async function reviewWithAnthropic(input: {
         : "Balance encouragement with direct, high-signal critique.";
 
   const runs = PERSONAS.map(async (persona) => {
-    const response = await client.messages.create({
+    const response = await createMessageWithContinuation(client, {
       model,
       max_tokens: 1600,
       temperature: 0.5,
-      tools: persona.name === "Skeptic" ? buildWebSearchTools() : undefined,
       system: [
         `You are the ${persona.name} persona in a private writing app.`,
         `Role: ${persona.role}`,
@@ -164,7 +189,7 @@ export async function scanFreshnessWithAnthropic(input: {
   const { model } = requireAnthropicConfig();
   const client = buildClient();
 
-  const response = await client.messages.create({
+  const response = await createMessageWithContinuation(client, {
     model,
     max_tokens: 1800,
     temperature: 0.2,
