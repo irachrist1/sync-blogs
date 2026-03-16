@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sync Blogs — Dump everything here. Don't edit yourself.</title>
+    <meta name="description" content="Paste your messy thoughts. Sync turns them into articles that actually sound like you." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/landing.css" />
+  </head>
+  <body class="lp-body">
+
+    <!-- ═══════════════════════ NAV ═══════════════════════ -->
+    <nav class="lp-nav" id="lp-nav">
+      <div class="lp-nav-inner">
+        <a href="/" class="lp-nav-logo">Sync</a>
+        <div class="lp-nav-links">
+          <a href="#how-it-works" class="lp-nav-link">How it works</a>
+          <a href="#pricing" class="lp-nav-link">Pricing</a>
+          <a href="/app" class="lp-nav-link">Sign in</a>
+          <!-- TODO: show this only when logged in -->
+          <a href="/app" class="lp-nav-link lp-nav-back">← Back to app</a>
+        </div>
+        <a href="/app" class="lp-btn lp-btn-primary lp-nav-cta">Start writing free</a>
+        <button class="lp-nav-mobile-toggle" id="lp-mobile-toggle" aria-label="Toggle menu">☰</button>
+      </div>
+      <div class="lp-nav-mobile-menu" id="lp-mobile-menu">
+        <a href="#how-it-works" class="lp-nav-mobile-link">How it works</a>
+        <a href="#pricing" class="lp-nav-mobile-link">Pricing</a>
+        <a href="/app" class="lp-nav-mobile-link">Sign in</a>
+        <a href="/app" class="lp-btn lp-btn-primary" style="margin-top: 8px;">Start writing free</a>
+      </div>
+    </nav>
+
+    <!-- ═══════════════════════ HERO ═══════════════════════ -->
+    <section class="lp-hero">
+      <div class="lp-container lp-hero-container">
+        <div class="lp-hero-content">
+          <h1 class="lp-hero-headline reveal">
+            Dump everything here.<br /><em>Don't edit yourself.</em>
+          </h1>
+          <p class="lp-hero-sub reveal reveal-delay-1">
+            Paste your messy thoughts. Sync turns them into articles that actually sound like you.
+          </p>
+          <div class="lp-hero-ctas reveal reveal-delay-2">
+            <a href="/app" class="lp-btn lp-btn-primary lp-btn-lg">Start writing free</a>
+            <a href="#how-it-works" class="lp-btn lp-btn-ghost lp-btn-lg">See how it works</a>
+          </div>
+        </div>
+
+        <div class="lp-hero-mockup reveal reveal-delay-3" aria-hidden="true">
+          <div class="lp-mockup-window">
+            <div class="lp-mockup-titlebar">
+              <div class="lp-mockup-dots">
+                <span class="lp-dot lp-dot-red"></span>
+                <span class="lp-dot lp-dot-yellow"></span>
+                <span class="lp-dot lp-dot-green"></span>
+              </div>
+              <span class="lp-mockup-url">syncblogs.app</span>
+            </div>
+            <div class="lp-mockup-body">
+              <div class="lp-mockup-panel-header">
+                <span class="lp-mockup-label">Start from thoughts</span>
+              </div>
+              <div class="lp-mockup-textarea">
+                <span id="hero-typed-text"></span><span class="lp-cursor" id="hero-cursor">|</span>
+              </div>
+              <button class="lp-mockup-generate-btn" id="hero-generate-btn">
+                Turn this into a draft →
+              </button>
+              <div class="lp-mockup-draft-result" id="hero-draft-result">
+                <div class="lp-mockup-draft-label">✦ Draft generated</div>
+                <div class="lp-mockup-draft-text" id="hero-draft-text"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════ SOCIAL PROOF ═══════════════════════ -->
+    <div class="lp-social-proof">
+      <div class="lp-container">
+        <div class="lp-social-proof-inner">
+          <!-- TODO: replace with real company logos -->
+          <span class="lp-social-label">Trusted by writers at</span>
+          <div class="lp-social-logos">
+            <!-- The Verge: V chevron mark -->
+            <svg class="lp-social-icon" viewBox="0 0 40 22" fill="currentColor" aria-label="The Verge">
+              <polygon points="0,0 8,0 20,16 32,0 40,0 20,22"/>
+            </svg>
+            <!-- Substack: 3-bar newsletter mark -->
+            <svg class="lp-social-icon" viewBox="0 0 24 24" fill="currentColor" aria-label="Substack">
+              <path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 17.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/>
+            </svg>
+            <!-- Product Hunt: circle with block P -->
+            <svg class="lp-social-icon" viewBox="0 0 24 24" fill="currentColor" aria-label="Product Hunt">
+              <path d="M13.604 8.4H9.6V12h3.954a1.8 1.8 0 000-3.6zM12 0C5.373 0 0 5.372 0 12c0 6.627 5.373 12 12 12 6.628 0 12-5.373 12-12 0-6.628-5.372-12-12-12zm1.604 15.6H9.6V18H7.2V6h6.404a4.2 4.2 0 010 8.4z"/>
+            </svg>
+            <!-- Medium: three decreasing ellipses -->
+            <svg class="lp-social-icon" viewBox="0 0 24 24" fill="currentColor" aria-label="Medium">
+              <path d="M13.54 12a6.8 6.8 0 01-6.77 6.82A6.8 6.8 0 010 12a6.8 6.8 0 016.77-6.82A6.8 6.8 0 0113.54 12zm7.42 0c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z"/>
+            </svg>
+            <!-- Dev.to: DEV in dark box -->
+            <svg class="lp-social-icon" viewBox="0 0 52 28" aria-label="Dev.to">
+              <rect width="52" height="28" rx="5" fill="currentColor"/>
+              <text x="26" y="19" text-anchor="middle" fill="#f4f2ed" font-family="system-ui,sans-serif" font-size="13" font-weight="800" letter-spacing="0.5">DEV</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════ HOW IT WORKS ═══════════════════════ -->
+    <section id="how-it-works" class="lp-how">
+      <div class="lp-container">
+        <p class="lp-section-eyebrow lp-centered reveal">How it works</p>
+        <h2 class="lp-section-headline lp-centered reveal reveal-delay-1">Three steps. One draft.</h2>
+
+        <!-- Step 01 — Dump -->
+        <div class="lp-step reveal">
+          <div class="lp-step-meta">
+            <span class="lp-step-number">01</span>
+            <div class="lp-step-text">
+              <h3 class="lp-step-headline">Brain dump. No judgment.</h3>
+              <p class="lp-step-body">
+                Paste bullets, fragments, voice note transcripts, rough ideas — anything.
+                No pressure to be coherent. That's our job.
+              </p>
+            </div>
+          </div>
+          <div class="lp-step-visual">
+            <div class="lp-step-mockup">
+              <div class="lp-sm-label">Start from thoughts</div>
+              <div class="lp-sm-textarea">
+                <div class="lp-sm-text">
+                  • need to write about our Q1 product launch<br />
+                  • users keep asking about the new api<br />
+                  • maybe compare to old way?? idk<br />
+                  • something about developer experience<br />
+                  • IMPORTANT: mention the migration guide<br />
+                  • also the slack integration is huge<br />
+                  • talk to the founders angle
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 02 — Clarify -->
+        <div class="lp-step lp-step-alt reveal">
+          <div class="lp-step-meta">
+            <span class="lp-step-number">02</span>
+            <div class="lp-step-text">
+              <h3 class="lp-step-headline">Two questions. Then we draft.</h3>
+              <p class="lp-step-body">
+                Before writing, Sync asks targeted follow-up questions — who's this for,
+                what angle, how long? Less guessing, better output.
+              </p>
+            </div>
+          </div>
+          <div class="lp-step-visual">
+            <div class="lp-step-mockup">
+              <div class="lp-sm-question-card">
+                <div class="lp-sm-question-header">✦ Two quick questions</div>
+                <div class="lp-sm-question">
+                  <label class="lp-sm-q-label">Who's the primary reader?</label>
+                  <div class="lp-sm-q-options">
+                    <span class="lp-sm-q-option lp-sm-q-selected">Developers</span>
+                    <span class="lp-sm-q-option">General audience</span>
+                    <span class="lp-sm-q-option">Executives</span>
+                  </div>
+                </div>
+                <div class="lp-sm-question">
+                  <label class="lp-sm-q-label">What's the core angle?</label>
+                  <div class="lp-sm-q-options">
+                    <span class="lp-sm-q-option">Announcement</span>
+                    <span class="lp-sm-q-option lp-sm-q-selected">How-to guide</span>
+                    <span class="lp-sm-q-option">Opinion piece</span>
+                  </div>
+                </div>
+                <button class="lp-sm-q-btn" style="cursor:default;">Generate draft →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 03 — Publish -->
+        <div class="lp-step reveal">
+          <div class="lp-step-meta">
+            <span class="lp-step-number">03</span>
+            <div class="lp-step-text">
+              <h3 class="lp-step-headline">An article that sounds like you.</h3>
+              <p class="lp-step-body">
+                Sync generates a structured, formatted draft that matches your voice,
+                your tone, and your publishing destination.
+              </p>
+            </div>
+          </div>
+          <div class="lp-step-visual">
+            <div class="lp-step-mockup">
+              <div class="lp-sm-draft-title">
+                How the New API Changes Everything for Developers
+              </div>
+              <div class="lp-sm-draft-body">
+                We've been quietly building toward this moment. The new API isn't just a
+                version bump — it's a fundamentally different way to integrate with our
+                platform. Here's what that means for your workflow.<br /><br />
+                <strong>The old way was painful.</strong> You'd spend more time managing
+                state than shipping features. The new API inverts that…
+              </div>
+              <div class="lp-sm-draft-actions">
+                <span class="lp-sm-badge">✓ Structured</span>
+                <span class="lp-sm-badge">✓ In your voice</span>
+                <span class="lp-sm-badge">✓ Ready to publish</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════ PERSONALIZATION (dark) ═══════════════════════ -->
+    <section class="lp-personalization">
+      <div class="lp-container">
+        <div class="lp-personalization-inner">
+          <div class="lp-personalization-text reveal">
+            <h2 class="lp-personalization-headline">It learns how you write.</h2>
+            <p class="lp-personalization-body">
+              Answer a few questions during onboarding. Sync builds your writing profile —
+              tone, sentence style, hook preference, formatting habits — and applies it to
+              every draft it generates.
+            </p>
+            <a href="/app" class="lp-btn lp-btn-outline-light lp-btn-lg">
+              Set up your writing profile →
+            </a>
+          </div>
+          <div class="lp-personalization-visual reveal reveal-delay-2">
+            <div class="lp-profile-card">
+              <div class="lp-profile-header">
+                <span class="lp-profile-badge">Your writing profile</span>
+              </div>
+              <div class="lp-profile-question">
+                <div class="lp-profile-q">How would you describe your writing tone?</div>
+                <div class="lp-profile-options">
+                  <div class="lp-profile-option lp-profile-selected">Direct &amp; confident</div>
+                  <div class="lp-profile-option">Warm &amp; conversational</div>
+                  <div class="lp-profile-option">Academic &amp; precise</div>
+                </div>
+              </div>
+              <div class="lp-profile-question">
+                <div class="lp-profile-q">How do you open an article?</div>
+                <div class="lp-profile-options">
+                  <div class="lp-profile-option lp-profile-selected">Bold statement</div>
+                  <div class="lp-profile-option">Story or anecdote</div>
+                  <div class="lp-profile-option">Data or stat</div>
+                </div>
+              </div>
+              <div class="lp-profile-question">
+                <div class="lp-profile-q">Preferred sentence length?</div>
+                <div class="lp-profile-options">
+                  <div class="lp-profile-option lp-profile-selected">Short &amp; punchy</div>
+                  <div class="lp-profile-option">Balanced variety</div>
+                  <div class="lp-profile-option">Longer, thoughtful</div>
+                </div>
+              </div>
+              <div class="lp-profile-footer">Profile saved · Applied to all drafts</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════ BEFORE / AFTER ═══════════════════════ -->
+    <section class="lp-before-after">
+      <div class="lp-container">
+        <p class="lp-section-eyebrow lp-centered reveal">See the difference</p>
+        <h2 class="lp-section-headline lp-centered reveal reveal-delay-1">
+          From brain dump to byline.
+        </h2>
+        <p class="lp-section-sub lp-centered reveal reveal-delay-2">
+          Same ideas. Completely different result.
+        </p>
+        <div class="lp-ba-toggle reveal reveal-delay-3">
+          <button class="lp-ba-btn lp-ba-active" id="ba-before-btn">Before</button>
+          <button class="lp-ba-btn" id="ba-after-btn">After</button>
+        </div>
+        <div class="lp-ba-panels reveal reveal-delay-4">
+          <div class="lp-ba-panel" id="ba-before-panel">
+            <div class="lp-ba-panel-label">
+              <span class="lp-ba-pill">Raw dump</span>
+            </div>
+            <div class="lp-ba-content lp-ba-before-content">
+              • productivity system needs article<br />
+              • tried like 4 different apps lol<br />
+              • notion is overrated imo<br />
+              • but also i use it every day?? contradiction<br />
+              • the real system is the habits not the app<br />
+              • something about analog vs digital<br />
+              • my friend jake does paper index cards - works for him<br />
+              • point: tool doesnt matter, execution does<br />
+              • also attention spans, distractions, notifs<br />
+              • maybe mention deep work?? and cal newport<br />
+              • end with: find what works, stop switching apps<br />
+              • needs to be opinionated not listicle
+            </div>
+          </div>
+          <div class="lp-ba-panel lp-ba-panel-hidden" id="ba-after-panel">
+            <div class="lp-ba-panel-label">
+              <span class="lp-ba-pill lp-ba-pill-after">✦ Synced draft</span>
+            </div>
+            <div class="lp-ba-content lp-ba-after-content">
+              <strong>Stop Shopping for Productivity Systems. Start Using One.</strong>
+              <br /><br />
+              I've tried them all — Notion, Roam, Obsidian, Logseq, plain text files. I've
+              built elaborate second brains and abandoned them within a week. And somewhere
+              between my third "fresh start" and my fourth app migration, I realized the
+              obvious thing nobody wants to hear:
+              <br /><br />
+              <em>The app doesn't matter. The habit does.</em>
+              <br /><br />
+              A friend of mine uses index cards. Paper ones, from the dollar store. His
+              output is three times mine on a bad week. He doesn't think about his system
+              — he just uses it. That's the entire lesson, and no productivity app can
+              teach it for you.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════ TESTIMONIALS ═══════════════════════ -->
+    <section class="lp-testimonials">
+      <div class="lp-container">
+        <div class="lp-testimonials-grid">
+          <!-- TODO: replace with real testimonials -->
+          <div class="lp-quote-card reveal">
+            <div class="lp-quote-mark">"</div>
+            <blockquote class="lp-quote-text">
+              I went from staring at a blank page to publishing in 20 minutes.
+              The draft actually sounded like me — not like a robot wrote it.
+            </blockquote>
+            <div class="lp-quote-author">
+              <!-- TODO: replace with real name -->
+              <div class="lp-quote-name">Sarah K.</div>
+              <div class="lp-quote-role">Indie writer, 12k subscribers</div>
+            </div>
+          </div>
+          <div class="lp-quote-card reveal reveal-delay-1">
+            <div class="lp-quote-mark">"</div>
+            <blockquote class="lp-quote-text">
+              I used to have 47 unfinished drafts sitting in Notion. Now I actually
+              finish things. The clarifying questions are the secret weapon.
+            </blockquote>
+            <div class="lp-quote-author">
+              <!-- TODO: replace with real name -->
+              <div class="lp-quote-name">Marcus T.</div>
+              <div class="lp-quote-role">Senior engineer, technical blog</div>
+            </div>
+          </div>
+          <div class="lp-quote-card reveal reveal-delay-2">
+            <div class="lp-quote-mark">"</div>
+            <blockquote class="lp-quote-text">
+              Other AI tools give me generic slop. Sync actually produces posts that fit
+              my style. My audience hasn't noticed the change — that's the whole point.
+            </blockquote>
+            <div class="lp-quote-author">
+              <!-- TODO: replace with real name -->
+              <div class="lp-quote-name">Priya M.</div>
+              <div class="lp-quote-role">Product manager, newsletter creator</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════ PRICING ═══════════════════════ -->
+    <section id="pricing" class="lp-pricing">
+      <div class="lp-container">
+        <p class="lp-section-eyebrow lp-centered reveal">Simple pricing</p>
+        <h2 class="lp-section-headline lp-centered reveal reveal-delay-1">No surprises.</h2>
+        <div class="lp-pricing-grid reveal reveal-delay-2">
+          <div class="lp-pricing-card">
+            <div class="lp-pricing-tier">Free</div>
+            <div class="lp-pricing-price">$0<span class="lp-pricing-period">/month</span></div>
+            <div class="lp-pricing-desc">Good for getting started.</div>
+            <ul class="lp-pricing-features">
+              <li class="lp-pricing-feature">5 drafts per month</li>
+              <li class="lp-pricing-feature">Basic writing profile</li>
+              <li class="lp-pricing-feature">3 persona review modes</li>
+              <li class="lp-pricing-feature">Freshness monitoring</li>
+            </ul>
+            <a href="/app" class="lp-btn lp-btn-outline lp-btn-lg lp-full-width">
+              Start for free
+            </a>
+          </div>
+          <div class="lp-pricing-card lp-pricing-card-pro">
+            <div class="lp-pricing-tier-wrap">
+              <div class="lp-pricing-tier">Pro</div>
+              <!-- TODO: replace with real pricing -->
+              <div class="lp-pricing-badge">Most popular</div>
+            </div>
+            <div class="lp-pricing-price">$12<span class="lp-pricing-period">/month</span></div>
+            <div class="lp-pricing-desc">For writers who publish regularly.</div>
+            <ul class="lp-pricing-features">
+              <li class="lp-pricing-feature lp-feature-check">Unlimited drafts</li>
+              <li class="lp-pricing-feature lp-feature-check">Full writing profile personalization</li>
+              <li class="lp-pricing-feature lp-feature-check">Multiple writing profiles</li>
+              <li class="lp-pricing-feature lp-feature-check">Priority generation</li>
+              <li class="lp-pricing-feature lp-feature-check">All 5 persona reviewers</li>
+              <li class="lp-pricing-feature lp-feature-check">Advanced freshness monitoring</li>
+            </ul>
+            <a href="/app" class="lp-btn lp-btn-primary lp-btn-lg lp-full-width">
+              Start with Pro
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════ FINAL CTA ═══════════════════════ -->
+    <section class="lp-final-cta">
+      <div class="lp-container">
+        <h2 class="lp-final-headline reveal">
+          Your ideas deserve better<br /><em>than a blank page.</em>
+        </h2>
+        <a href="/app" class="lp-btn lp-btn-light lp-btn-xl reveal reveal-delay-1">
+          Start writing free — no credit card needed
+        </a>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════ FOOTER ═══════════════════════ -->
+    <footer class="lp-footer">
+      <div class="lp-container">
+        <div class="lp-footer-inner">
+          <div class="lp-footer-brand">
+            <a href="/" class="lp-footer-logo">Sync</a>
+            <p class="lp-footer-tagline">
+              Built with love for writers who think faster than they type.
+            </p>
+          </div>
+          <div class="lp-footer-links">
+            <!-- TODO: add real links -->
+            <a href="#" class="lp-footer-link">Privacy</a>
+            <a href="#" class="lp-footer-link">Terms</a>
+            <a href="#" class="lp-footer-link">Twitter / X</a>
+            <a href="#" class="lp-footer-link">GitHub</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="/landing.js"></script>
+  </body>
+</html>
