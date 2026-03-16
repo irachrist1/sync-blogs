@@ -10,6 +10,20 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 app.use(express.json({ limit: "1mb" }));
+
+// Request logging middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  const method = req.method;
+  const url = req.originalUrl;
+  console.log(`[${new Date().toISOString()}] → ${method} ${url}`);
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    console.log(`[${new Date().toISOString()}] ← ${method} ${url} ${res.statusCode} (${duration}ms)`);
+  });
+  next();
+});
+
 app.use(express.static(join(__dirname, "..", "public")));
 
 app.get("/health", (_req, res) => {
@@ -139,8 +153,15 @@ app.get("/v1/settings", (_req, res) => {
 });
 
 app.patch("/v1/settings", (req, res) => {
-  const versionWatchlist = (req.body?.versionWatchlist ?? {}) as Record<string, string>;
-  return res.json(service.updateWatchlist(versionWatchlist));
+  if (req.body?.versionWatchlist) {
+    const versionWatchlist = req.body.versionWatchlist as Record<string, string>;
+    service.updateWatchlist(versionWatchlist);
+  }
+  if (req.body?.voiceProfile) {
+    const voiceProfile = req.body.voiceProfile as Record<string, string>;
+    service.updateVoiceProfile(voiceProfile);
+  }
+  return res.json(service.getSettings());
 });
 
 app.get(/.*/, (_req, res) => {

@@ -87,6 +87,7 @@ interface StoreState {
   freshnessUpdates: FreshnessUpdateRecord[];
   settings: {
     versionWatchlist: Record<string, string>;
+    voiceProfile: Record<string, string>;
   };
 }
 
@@ -100,6 +101,7 @@ const DEFAULT_STORE: StoreState = {
     versionWatchlist: {
       codex: "5.3",
     },
+    voiceProfile: {},
   },
 };
 
@@ -242,16 +244,22 @@ export class AppService {
     const post = this.state.posts.find((p) => p.id === postId);
     if (!post) return null;
 
+    console.log(`[appService] composeDraft: postId=${postId}, mode=${mode || "all"}`);
     const options = await composeWithAnthropic({
       title: post.title,
       roughInput,
       mode,
+      voiceProfile: this.state.settings.voiceProfile,
     });
     const created: RevisionRecord[] = [];
     for (const option of options) {
-      const body = `${option.titleSuggestion}\n\n${option.draft}`;
-      const revision = this.saveRevision(postId, body, "generated");
-      if (revision) created.push(revision);
+      // Store draft body without title to avoid duplication
+      const revision = this.saveRevision(postId, option.draft, "generated");
+      if (revision) {
+        // Attach titleSuggestion as metadata on the revision object for the frontend
+        (revision as RevisionRecord & { titleSuggestion?: string }).titleSuggestion = option.titleSuggestion;
+        created.push(revision);
+      }
     }
     return created;
   }
@@ -451,6 +459,18 @@ export class AppService {
       normalized[cleanKey] = cleanValue;
     }
     this.state.settings.versionWatchlist = normalized;
+    this.persist();
+    return this.state.settings;
+  }
+
+  updateVoiceProfile(voiceProfile: Record<string, string>): StoreState["settings"] {
+    const cleaned: Record<string, string> = {};
+    for (const [key, value] of Object.entries(voiceProfile)) {
+      const cleanKey = String(key).trim();
+      const cleanValue = String(value).trim();
+      if (cleanKey) cleaned[cleanKey] = cleanValue;
+    }
+    this.state.settings.voiceProfile = cleaned;
     this.persist();
     return this.state.settings;
   }

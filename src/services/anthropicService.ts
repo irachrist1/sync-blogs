@@ -64,7 +64,7 @@ async function createMessageWithContinuation(
   client: Anthropic,
   params: Anthropic.MessageCreateParams,
 ): Promise<Anthropic.Message> {
-  let response = await client.messages.create(params);
+  let response = await client.messages.create(params) as Anthropic.Message;
 
   while (response.stop_reason === "pause_turn") {
     response = await client.messages.create({
@@ -80,7 +80,7 @@ async function createMessageWithContinuation(
           content: response.content,
         },
       ],
-    });
+    }) as Anthropic.Message;
   }
 
   return response;
@@ -105,24 +105,41 @@ export async function composeWithAnthropic(input: {
   title: string;
   roughInput: string;
   mode?: "argument" | "narrative" | "brief";
+  voiceProfile?: Record<string, string>;
 }): Promise<DraftOptionResult[]> {
   const { model } = requireAnthropicConfig();
   const client = buildClient();
+
+  console.log(`[compose] Starting draft generation for "${input.title}" with model ${model}`);
+  const startTime = Date.now();
+
+  // Build voice profile instructions if available
+  const voiceLines: string[] = [];
+  if (input.voiceProfile && Object.keys(input.voiceProfile).length > 0) {
+    voiceLines.push("The writer has described their voice and preferences:");
+    for (const [key, value] of Object.entries(input.voiceProfile)) {
+      if (value) voiceLines.push(`- ${key}: ${value}`);
+    }
+    voiceLines.push("Match this voice closely. The output should sound like this specific person, not like generic AI writing.");
+  }
 
   const prompt = [
     "You are helping a writer turn rough thoughts into polished but human writing.",
     "Return valid JSON only.",
     "The JSON must be an object with key `options`, where `options` is an array of 1-3 objects.",
     "Each option object must have: `mode`, `titleSuggestion`, `draft`.",
+    "The `draft` field should NOT include the title — it should start with the first paragraph of the body.",
     "The three supported modes are `argument`, `narrative`, and `brief`.",
     "Avoid generic AI tone, filler, corporate cadence, and em-dash overuse.",
     "Preserve specificity and natural phrasing.",
+    ...voiceLines,
     input.mode ? `Only return the requested mode: ${input.mode}.` : "Return all three modes.",
     `Existing title context: ${input.title || "Untitled draft"}`,
     "Rough thoughts:",
     input.roughInput,
   ].join("\n");
 
+  console.log(`[compose] Sending request to Anthropic...`);
   const response = await createMessageWithContinuation(client, {
     model,
     max_tokens: 2200,
@@ -132,7 +149,11 @@ export async function composeWithAnthropic(input: {
     messages: [{ role: "user", content: prompt }],
   });
 
+  const elapsed = Date.now() - startTime;
+  console.log(`[compose] Anthropic responded in ${elapsed}ms`);
+
   const parsed = parseJsonResponse<{ options: DraftOptionResult[] }>(readTextFromMessage(response));
+  console.log(`[compose] Generated ${parsed.options.length} draft option(s)`);
   return parsed.options;
 }
 
@@ -144,6 +165,9 @@ export async function reviewWithAnthropic(input: {
   const { model } = requireAnthropicConfig();
   const client = buildClient();
 
+  console.log(`[review] Starting review for "${input.title}" with intensity=${input.intensity}, model=${model}`);
+  const startTime = Date.now();
+
   const intensityLine =
     input.intensity === "gentle"
       ? "Keep feedback light and limited to the most important improvements."
@@ -152,6 +176,8 @@ export async function reviewWithAnthropic(input: {
         : "Balance encouragement with direct, high-signal critique.";
 
   const runs = PERSONAS.map(async (persona) => {
+    const personaStart = Date.now();
+    console.log(`[review] Sending ${persona.name} persona request...`);
     const response = await createMessageWithContinuation(client, {
       model,
       max_tokens: 1600,
@@ -175,10 +201,15 @@ export async function reviewWithAnthropic(input: {
       ],
     });
 
+    const personaElapsed = Date.now() - personaStart;
+    console.log(`[review] ${persona.name} responded in ${personaElapsed}ms`);
     return parseJsonResponse<PersonaOutput>(readTextFromMessage(response));
   });
 
-  return Promise.all(runs);
+  const results = await Promise.all(runs);
+  const totalElapsed = Date.now() - startTime;
+  console.log(`[review] All ${results.length} personas completed in ${totalElapsed}ms`);
+  return results;
 }
 
 export async function scanFreshnessWithAnthropic(input: {
@@ -188,6 +219,9 @@ export async function scanFreshnessWithAnthropic(input: {
 }): Promise<FreshnessSuggestionResult[]> {
   const { model } = requireAnthropicConfig();
   const client = buildClient();
+
+  console.log(`[freshness] Starting scan for "${input.title}" with model ${model}`);
+  const startTime = Date.now();
 
   const response = await createMessageWithContinuation(client, {
     model,
@@ -211,7 +245,11 @@ export async function scanFreshnessWithAnthropic(input: {
     ],
   });
 
+  const elapsed = Date.now() - startTime;
+  console.log(`[freshness] Anthropic responded in ${elapsed}ms`);
+
   const parsed = parseJsonResponse<{ suggestions: FreshnessSuggestionResult[] }>(readTextFromMessage(response));
+  console.log(`[freshness] Found ${parsed.suggestions.length} suggestion(s)`);
   return parsed.suggestions;
 }
 

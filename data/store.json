@@ -1,12 +1,90 @@
 {
-  "posts": [],
-  "revisions": [],
+  "posts": [
+    {
+      "id": "c77f3dce-5b5b-4dab-a749-4b59aeb99cac",
+      "title": "AI Writing Tools and Voice",
+      "status": "published",
+      "visibility": "private",
+      "createdAt": "2026-03-16T19:54:00.761Z",
+      "updatedAt": "2026-03-16T19:54:32.439Z",
+      "tags": [],
+      "monitorFreshness": true,
+      "publishedAt": "2026-03-16T19:54:32.439Z"
+    },
+    {
+      "id": "06cc3003-2441-4544-81ce-b9e57b15381f",
+      "title": "We Crossed a Line Somewhere Between 2024 and Now",
+      "status": "draft",
+      "visibility": "private",
+      "createdAt": "2026-03-16T19:55:15.878Z",
+      "updatedAt": "2026-03-16T20:14:27.890Z",
+      "tags": [],
+      "monitorFreshness": true
+    }
+  ],
+  "revisions": [
+    {
+      "id": "99fb976f-9ec3-4ae1-82e0-2b2faac1144e",
+      "postId": "c77f3dce-5b5b-4dab-a749-4b59aeb99cac",
+      "revisionNumber": 1,
+      "content": "This is a test draft about AI writing tools and how they should preserve voice.",
+      "contentHash": "c25deca7fecd89396dfd13c8f9a4ef454d3eac875c816a5036b84bc437841d90",
+      "source": "manual",
+      "createdAt": "2026-03-16T19:54:18.152Z"
+    },
+    {
+      "id": "ec4df970-7067-4066-8158-57c4803a9c51",
+      "postId": "06cc3003-2441-4544-81ce-b9e57b15381f",
+      "revisionNumber": 1,
+      "content": "We Crossed a Line Somewhere Between 2024 and Now\n\nSomething shifted between 2024 and 2026, and I don't think most people have fully registered what it means.\n\nThe models we have now — GPT-5.4 being the obvious landmark — aren't just better at the things 2024 models were already doing. They're doing things that weren't on the table two years ago. Sustained multi-step reasoning across long contexts. Autonomous coding workflows that don't just autocomplete but actually architect, debug, and ship. The kind of output that used to require a senior engineer sitting down for a focused afternoon.\n\nThat last point is worth sitting with. AI taking over development isn't a future concern anymore. It's a present one. The question isn't whether AI can write production code — it can — but what that actually means for how software gets built, who builds it, and what skills remain valuable.\n\nOn the AGI question: I think we're closer than the cautious consensus admits, and further than the hype cycle suggests. The current generation of models shows genuine capability jumps, not just benchmark inflation. But there's still a meaningful gap between 'very capable tool' and 'autonomous general reasoner.' ASI remains a longer horizon — though longer doesn't mean distant.\n\nMy prediction for the next few years: the bottleneck shifts from capability to integration. The models will keep improving. The harder problem becomes how organizations, workflows, and individuals actually absorb that improvement without either ignoring it or over-indexing on it. The people who figure out that interface — between human judgment and AI capability — are going to have a significant edge.",
+      "contentHash": "8837880aa22223cbb8a4a2a41bc260ed062ec6f3b3ee6dd158a4bd822cebff44",
+      "source": "generated",
+      "createdAt": "2026-03-16T20:12:10.316Z"
+    },
+    {
+      "id": "19dc9be5-7c52-4cad-bc01-d442f29c947d",
+      "postId": "06cc3003-2441-4544-81ce-b9e57b15381f",
+      "revisionNumber": 2,
+      "content": "Two Years Is a Long Time in AI\n\nI remember the conversations we were having about AI in 2024. The demos were impressive, the limitations were obvious, and most serious people were somewhere between cautiously optimistic and quietly skeptical about the timelines being thrown around.\n\nThat feels like a different era now.\n\nUsing GPT-5.4 for the first time, I kept stopping to recalibrate what I was looking at. Not because it was magic — it isn't — but because the gap between what I expected and what it actually did kept catching me off guard. The things I'd mentally filed under 'AI will get there eventually' had quietly become 'AI does this now.'\n\nDevelopment is the most visible example. I've watched the role of the human programmer shift in real time over the past year. Not disappear — that framing is too simple — but change in ways that are hard to fully articulate while you're inside them. The work is less about writing code and more about knowing what to ask for, how to verify it, and when to override it.\n\nWhere does this go? I've been turning that question over a lot lately. AGI feels less like a distant theoretical and more like something with a plausible shape and a rough timeline. ASI is harder to think about clearly — not because it's implausible, but because the honest answer is that the second-order effects are genuinely difficult to model.\n\nWhat I keep coming back to is this: the rate of change isn't slowing down. If anything, each capability jump seems to compress the timeline to the next one. I don't know exactly what the next few years look like, but I'm fairly confident they'll feel as discontinuous from 2026 as 2026 feels from 2024.",
+      "contentHash": "feb99102cbb04aee1026f663f8bde1201f06ec99ab73785d5c769f307568682a",
+      "source": "generated",
+      "createdAt": "2026-03-16T20:12:10.318Z"
+    },
+    {
+      "id": "657faf77-201a-4bd2-868f-3f5b11528782",
+      "postId": "06cc3003-2441-4544-81ce-b9e57b15381f",
+      "revisionNumber": 3,
+      "content": "State of AI, Mid-2026: What Changed and Where It's Going\n\nWe're two years past the point where most serious AI conversations were still hypothetical. Here's where things actually stand.\n\nThe capability jump from 2024 to now is real and specific. GPT-5.4 and models at that level can sustain complex reasoning across long contexts, handle autonomous multi-step coding tasks, and produce output that would have required significant human effort two years ago. AI-assisted development has crossed from 'useful tool' to 'core workflow' for a lot of teams.\n\nOn AGI and ASI: I think AGI is closer than mainstream consensus, further than the loudest predictions. The current models represent genuine progress, not just benchmark games. ASI is a longer road, but the pace makes long feel shorter than it used to.\n\nPredictions for the next few years: capability keeps compressing timelines. The constraint shifts from what AI can do to how fast humans and institutions can actually integrate it. The edge goes to people who build a clear mental model of where AI judgment is reliable and where it isn't — and who stay honest about updating that model as the technology moves.",
+      "contentHash": "bc79d32c79fb7f8df57ee66dfe2264032a88b76b49e14db3ed5dbdb237a48366",
+      "source": "generated",
+      "createdAt": "2026-03-16T20:12:10.319Z"
+    },
+    {
+      "id": "7e71edb5-2149-4a3d-ab2f-facc3b6937cc",
+      "postId": "06cc3003-2441-4544-81ce-b9e57b15381f",
+      "revisionNumber": 4,
+      "content": "We Crossed a Line Somewhere Between 2024 and Now\n\nSomething shifted between 2024 and 2026, and I don't think most people have fully registered what it means.\n\nThe models we have now — GPT-5.4 being the obvious landmark — aren't just better at the things 2024 models were already doing. They're doing things that weren't on the table two years ago. Sustained multi-step reasoning across long contexts. Autonomous coding workflows that don't just autocomplete but actually architect, debug, and ship. The kind of output that used to require a senior engineer sitting down for a focused afternoon.\n\nThat last point is worth sitting with. AI taking over development isn't a future concern anymore. It's a present one. The question isn't whether AI can write production code — it can — but what that actually means for how software gets built, who builds it, and what skills remain valuable.\n\nOn the AGI question: I think we're closer than the cautious consensus admits, and further than the hype cycle suggests. The current generation of models shows genuine capability jumps, not just benchmark inflation. But there's still a meaningful gap between 'very capable tool' and 'autonomous general reasoner.' ASI remains a longer horizon — though longer doesn't mean distant.\n\nMy prediction for the next few years: the bottleneck shifts from capability to integration. The models will keep improving. The harder problem becomes how organizations, workflows, and individuals actually absorb that improvement without either ignoring it or over-indexing on it. The people who figure out that interface — between human judgment and AI capability — are going to have a significant edge.",
+      "contentHash": "8837880aa22223cbb8a4a2a41bc260ed062ec6f3b3ee6dd158a4bd822cebff44",
+      "source": "generated",
+      "createdAt": "2026-03-16T20:13:09.210Z"
+    },
+    {
+      "id": "bcaecf57-2314-41cf-a92a-f38c065495c6",
+      "postId": "06cc3003-2441-4544-81ce-b9e57b15381f",
+      "revisionNumber": 5,
+      "content": "We Crossed a Line Somewhere Between 2024 and Now\n\nSomething shifted between 2024 and 2026, and I don't think most people have fully registered what it means.\n\nThe models we have now — GPT-5.4 being the obvious landmark — aren't just better at the things 2024 models were already doing. They're doing things that weren't on the table two years ago. Sustained multi-step reasoning across long contexts. Autonomous coding workflows that don't just autocomplete but actually architect, debug, and ship. The kind of output that used to require a senior engineer sitting down for a focused afternoon.\n\nThat last point is worth sitting with. AI taking over development isn't a future concern anymore. It's a present one. The question isn't whether AI can write production code — it can — but what that actually means for how software gets built, who builds it, and what skills remain valuable.\n\nOn the AGI question: I think we're closer than the cautious consensus admits, and further than the hype cycle suggests. The current generation of models shows genuine capability jumps, not just benchmark inflation. But there's still a meaningful gap between 'very capable tool' and 'autonomous general reasoner.' ASI remains a longer horizon — though longer doesn't mean distant.\n\nMy prediction for the next few years: the bottleneck shifts from capability to integration. The models will keep improving. The harder problem becomes how organizations, workflows, and individuals actually absorb that improvement without either ignoring it or over-indexing on it. The people who figure out that interface — between human judgment and AI capability — are going to have a significant edge.",
+      "contentHash": "8837880aa22223cbb8a4a2a41bc260ed062ec6f3b3ee6dd158a4bd822cebff44",
+      "source": "manual",
+      "createdAt": "2026-03-16T20:14:27.890Z"
+    }
+  ],
   "reviewRuns": [],
   "reviewItems": [],
   "freshnessUpdates": [],
   "settings": {
     "versionWatchlist": {
-      "codex": "5.3"
+      "react": "19.0",
+      "node": "22.0"
     }
   }
 }

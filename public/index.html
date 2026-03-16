@@ -7,99 +7,222 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <div class="shell">
+    <div class="app-shell">
+      <!-- ===== LEFT SIDEBAR ===== -->
       <aside class="sidebar">
-        <div class="brand">
-          <h1>Sync Blogs</h1>
-          <p>Private by default</p>
+        <div class="sidebar-brand">
+          <h1 class="brand-name">Sync</h1>
         </div>
-        <button id="new-post-btn" class="btn btn-primary full">New Draft</button>
-        <div class="tabs">
-          <button id="tab-write" class="tab active">Write</button>
-          <button id="tab-updates" class="tab">Updates</button>
-        </div>
-        <div id="post-list" class="post-list"></div>
+        <button id="new-draft-btn" class="btn-new-draft">
+          <span class="btn-icon">+</span> New Draft
+        </button>
+        <div id="draft-list" class="draft-list"></div>
+        <button id="settings-btn" class="sidebar-settings" title="Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
       </aside>
 
-      <main class="main">
-        <section id="write-view" class="view">
-          <header class="topbar">
-            <input id="title-input" class="title-input" placeholder="Untitled draft" />
-            <div class="actions">
-              <button id="save-btn" class="btn">Save</button>
-              <button id="review-btn" class="btn">Review</button>
-              <button id="publish-private-btn" class="btn">Publish Private</button>
-              <button id="publish-public-btn" class="btn btn-primary">Publish Public</button>
-            </div>
-          </header>
+      <!-- ===== CENTER WRITING AREA ===== -->
+      <main class="writing-area">
+        <!-- Empty state: no post selected -->
+        <div id="empty-state" class="center-state">
+          <div class="empty-prompt">
+            <h2 class="empty-title">What are you trying to say?</h2>
+            <p class="empty-subtitle">Start with your raw thinking. We'll help you shape it.</p>
+            <button id="empty-new-draft-btn" class="btn-start">Start writing</button>
+          </div>
+        </div>
 
-          <section class="compose-panel panel">
-            <div class="panel-header">
-              <h2>Start from thoughts</h2>
-              <select id="compose-mode">
-                <option value="">All draft modes</option>
-                <option value="argument">Argument</option>
-                <option value="narrative">Narrative</option>
-                <option value="brief">Brief</option>
-              </select>
-            </div>
+        <!-- Thoughts entry state: new draft, no content yet -->
+        <div id="thoughts-state" class="center-state hidden">
+          <div class="thoughts-container">
+            <h2 class="thoughts-prompt">Dump everything here. Don't edit yourself.</h2>
+            <p class="thoughts-hint">Paste bullets, fragments, rough notes, half-formed ideas — anything.</p>
             <textarea
               id="rough-input"
-              class="rough-input"
-              placeholder="Drop messy thoughts here. You can paste bullets, fragments, or rough notes."
+              class="thoughts-textarea"
+              placeholder="I've been thinking about..."
             ></textarea>
-            <div class="panel-actions">
-              <button id="compose-btn" class="btn">Generate Draft Options</button>
-            </div>
-            <div id="compose-results" class="compose-results"></div>
-          </section>
+            <button id="thoughts-action-btn" class="btn-primary-action">
+              Turn this into a draft
+            </button>
+          </div>
+        </div>
 
-          <section class="editor-wrap panel">
-            <textarea id="content-input" class="content-input" placeholder="Write here..."></textarea>
-          </section>
-        </section>
+        <!-- Draft options state: choosing from generated drafts -->
+        <div id="drafts-state" class="center-state hidden">
+          <div class="drafts-container">
+            <h2 class="drafts-prompt">Pick an approach</h2>
+            <p class="drafts-hint">Each takes your ideas in a different direction. You can always edit after.</p>
+            <div id="draft-options" class="draft-options"></div>
+            <button id="back-to-thoughts" class="btn-text">← Back to your notes</button>
+          </div>
+        </div>
 
-        <section id="updates-view" class="view hidden">
-          <header class="updates-header">
-            <h2>Freshness Queue</h2>
-            <div class="actions">
-              <button id="scan-current-btn" class="btn">Scan Current Post</button>
-              <button id="refresh-updates-btn" class="btn">Refresh Queue</button>
+        <!-- Editor state: writing/editing a draft -->
+        <div id="editor-state" class="center-state hidden">
+          <div class="editor-container">
+            <textarea
+              id="title-input"
+              class="editor-title"
+              placeholder="What are you trying to say?"
+              rows="1"
+            ></textarea>
+            <textarea
+              id="content-input"
+              class="editor-textarea"
+              placeholder="Start writing..."
+            ></textarea>
+            <div class="editor-footer">
+              <button id="see-other-approaches" class="btn-text hidden">← See other approaches</button>
+              <div class="editor-status">
+                <span id="save-status" class="save-status"></span>
+                <span id="freshness-badge" class="freshness-badge hidden"></span>
+              </div>
+              <button id="primary-action-btn" class="btn-primary-action">
+                Review this draft
+              </button>
             </div>
-          </header>
-          <div id="updates-list" class="updates-list"></div>
-        </section>
+          </div>
+        </div>
       </main>
 
-      <aside class="feedback">
-        <div class="feedback-header">
-          <h2>AI Collaboration</h2>
-          <select id="intensity-select">
-            <option value="gentle">Gentle</option>
-            <option value="balanced" selected>Balanced</option>
-            <option value="rigorous">Rigorous</option>
-          </select>
+      <!-- ===== RIGHT PANEL (AI Feedback) ===== -->
+      <aside id="right-panel" class="right-panel">
+        <div class="panel-header">
+          <h2 class="panel-title" id="panel-title">Your editors</h2>
+          <button id="close-panel-btn" class="btn-close-panel" title="Close panel">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
-        <div id="runtime-status" class="runtime-status">Checking Anthropic connection...</div>
-        <div id="review-summary" class="summary-card">
-          Trigger a review to see prioritized feedback.
-        </div>
-        <div id="feedback-items" class="feedback-items"></div>
-        <div class="watchlist panel">
-          <h3>Version Watchlist</h3>
-          <p>Used by freshness scans (example: `codex: 5.3`).</p>
-          <textarea id="watchlist-input" class="watchlist-input"></textarea>
-          <button id="save-watchlist-btn" class="btn full">Save Watchlist</button>
+
+        <!-- Review summary -->
+        <div id="panel-summary" class="panel-summary hidden"></div>
+
+        <!-- Persona feedback cards -->
+        <div id="persona-cards" class="persona-cards"></div>
+
+        <!-- Freshness scan results -->
+        <div id="freshness-results" class="freshness-results hidden"></div>
+
+        <!-- Loading state -->
+        <div id="panel-loading" class="panel-loading hidden">
+          <div class="loading-spinner"></div>
+          <p class="loading-text">Your editors are reading...</p>
         </div>
       </aside>
     </div>
+
+    <!-- ===== VOICE PROFILE MODAL (Onboarding) ===== -->
+    <div id="voice-modal" class="modal-overlay hidden">
+      <div class="modal-content modal-voice">
+        <div class="modal-header">
+          <h2>Tell us how you write</h2>
+          <button id="close-voice-btn" class="btn-close-panel">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="voice-intro">Quick answers help us match your voice. Skip any you're not sure about.</p>
+
+          <div class="voice-question">
+            <label class="voice-label">How would you describe your writing tone?</label>
+            <p class="voice-hint">e.g., conversational, formal, dry humor, direct, warm</p>
+            <input id="voice-tone" class="voice-input" type="text" placeholder="e.g., conversational but precise" />
+          </div>
+
+          <div class="voice-question">
+            <label class="voice-label">What kind of writing do you do most?</label>
+            <p class="voice-hint">e.g., essays, technical explainers, personal reflections, opinion pieces</p>
+            <input id="voice-genre" class="voice-input" type="text" placeholder="e.g., essays and technical explainers" />
+          </div>
+
+          <div class="voice-question">
+            <label class="voice-label">Who are you usually writing for?</label>
+            <p class="voice-hint">e.g., developers, general audience, industry peers, myself</p>
+            <input id="voice-audience" class="voice-input" type="text" placeholder="e.g., developers and tech-curious people" />
+          </div>
+
+          <div class="voice-question">
+            <label class="voice-label">What should AI-generated drafts avoid?</label>
+            <p class="voice-hint">e.g., corporate jargon, filler phrases, overly formal language, em-dashes</p>
+            <input id="voice-avoid" class="voice-input" type="text" placeholder="e.g., corporate jargon, filler, em-dashes" />
+          </div>
+
+          <div class="voice-question">
+            <label class="voice-label">Paste a paragraph of your own writing (optional)</label>
+            <p class="voice-hint">This helps us understand your natural rhythm and word choices.</p>
+            <textarea id="voice-sample" class="voice-textarea" placeholder="Paste a paragraph you've written that sounds like you..."></textarea>
+          </div>
+
+          <div class="voice-actions">
+            <button id="skip-voice-btn" class="btn-text">Skip for now</button>
+            <button id="save-voice-btn" class="btn-primary-action">Save my voice</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS MODAL ===== -->
+    <div id="settings-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Settings</h2>
+          <button id="close-settings-btn" class="btn-close-panel">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="setting-group">
+            <label class="setting-label">Connection Status</label>
+            <div id="settings-runtime" class="setting-status">Checking...</div>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">Your Writing Voice</label>
+            <p class="setting-hint">How AI drafts should sound. Update anytime.</p>
+            <button id="edit-voice-btn" class="btn-secondary">Edit voice profile</button>
+            <div id="voice-summary" class="voice-summary"></div>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">Feedback Intensity</label>
+            <p class="setting-hint">Controls how much feedback your editors give.</p>
+            <select id="intensity-select" class="setting-select">
+              <option value="gentle">Gentle — just the essentials</option>
+              <option value="balanced" selected>Balanced — thorough but focused</option>
+              <option value="rigorous">Rigorous — leave nothing unexamined</option>
+            </select>
+          </div>
+          <div class="setting-group">
+            <label class="setting-label">Version Watchlist</label>
+            <p class="setting-hint">Track software versions for freshness checks. One per line, format: name: version</p>
+            <textarea id="watchlist-input" class="setting-textarea" placeholder="react: 19.0&#10;node: 22.0"></textarea>
+            <button id="save-watchlist-btn" class="btn-secondary">Save watchlist</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
     <div id="toast" class="toast hidden"></div>
+
     <script type="module" src="/app.js"></script>
   </body>
 </html>
