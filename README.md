@@ -13,6 +13,14 @@ npm install
 npm run dev
 ```
 
+Add your Anthropic key first:
+
+```bash
+cp .env.example .env
+```
+
+Then set `ANTHROPIC_API_KEY` in `.env`.
+
 Open:
 
 - `http://localhost:4000`
@@ -21,12 +29,13 @@ Open:
 
 - Full browser app (`public/`) served by Express.
 - Post creation, selection, title editing, revision saving.
-- "Start from thoughts" draft generation (argument/narrative/brief).
-- AI collaborator review with prioritized feedback and decision actions.
+- Claude-powered "start from thoughts" draft generation (argument/narrative/brief).
+- Claude-powered AI collaborator review with prioritized feedback and decision actions.
 - Publish (private/public) and freshness scan workflow.
 - Freshness queue with approve/dismiss/snooze actions.
 - Persistent local data storage in `data/store.json`.
 - Version watchlist settings used by freshness checks.
+- Runtime status endpoint at `GET /v1/runtime`.
 
 ## Useful API endpoints
 

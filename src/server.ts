@@ -16,6 +16,10 @@ app.get("/health", (_req, res) => {
   res.json({ ok: true, service: "sync-blogs", date: new Date().toISOString() });
 });
 
+app.get("/v1/runtime", (_req, res) => {
+  return res.json(service.getRuntimeStatus());
+});
+
 app.get("/v1/posts", (req, res) => {
   const status = req.query.status as "draft" | "published" | "archived" | undefined;
   return res.json(service.listPosts(status));
@@ -54,20 +58,28 @@ app.post("/v1/posts/:postId/revisions", (req, res) => {
   return res.status(201).json(revision);
 });
 
-app.post("/v1/posts/:postId/compose", (req, res) => {
-  const roughInput = String(req.body?.roughInput ?? "");
-  if (!roughInput.trim()) return res.status(400).json({ error: "roughInput is required" });
-  const mode = req.body?.mode as "argument" | "narrative" | "brief" | undefined;
-  const revisions = service.composeDraft(req.params.postId, roughInput, mode);
-  if (!revisions) return res.status(404).json({ error: "post not found" });
-  return res.json(revisions);
+app.post("/v1/posts/:postId/compose", async (req, res) => {
+  try {
+    const roughInput = String(req.body?.roughInput ?? "");
+    if (!roughInput.trim()) return res.status(400).json({ error: "roughInput is required" });
+    const mode = req.body?.mode as "argument" | "narrative" | "brief" | undefined;
+    const revisions = await service.composeDraft(req.params.postId, roughInput, mode);
+    if (!revisions) return res.status(404).json({ error: "post not found" });
+    return res.json(revisions);
+  } catch (error) {
+    return res.status(500).json({ error: error instanceof Error ? error.message : "Compose failed" });
+  }
 });
 
-app.post("/v1/posts/:postId/review-runs", (req, res) => {
-  const intensity = req.body?.intensity as "gentle" | "balanced" | "rigorous" | undefined;
-  const result = service.triggerReviewRun(req.params.postId, intensity ?? "balanced");
-  if (!result) return res.status(404).json({ error: "post or revision not found" });
-  return res.status(202).json(result);
+app.post("/v1/posts/:postId/review-runs", async (req, res) => {
+  try {
+    const intensity = req.body?.intensity as "gentle" | "balanced" | "rigorous" | undefined;
+    const result = await service.triggerReviewRun(req.params.postId, intensity ?? "balanced");
+    if (!result) return res.status(404).json({ error: "post or revision not found" });
+    return res.status(202).json(result);
+  } catch (error) {
+    return res.status(500).json({ error: error instanceof Error ? error.message : "Review failed" });
+  }
 });
 
 app.get("/v1/review-runs/:runId", (req, res) => {
@@ -92,9 +104,15 @@ app.post("/v1/posts/:postId/publish", (req, res) => {
   return res.json(row);
 });
 
-app.post("/v1/posts/:postId/freshness-scan", (req, res) => {
-  const rows = service.runFreshnessScan(req.params.postId);
-  return res.json(rows);
+app.post("/v1/posts/:postId/freshness-scan", async (req, res) => {
+  try {
+    const rows = await service.runFreshnessScan(req.params.postId);
+    return res.json(rows);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ error: error instanceof Error ? error.message : "Freshness scan failed" });
+  }
 });
 
 app.get("/v1/freshness/updates", (req, res) => {

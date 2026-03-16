@@ -13,6 +13,7 @@ const el = {
   composeResults: document.querySelector("#compose-results"),
   feedbackItems: document.querySelector("#feedback-items"),
   reviewSummary: document.querySelector("#review-summary"),
+  runtimeStatus: document.querySelector("#runtime-status"),
   updatesList: document.querySelector("#updates-list"),
   intensity: document.querySelector("#intensity-select"),
   watchlistInput: document.querySelector("#watchlist-input"),
@@ -33,6 +34,15 @@ async function api(path, options = {}) {
     throw new Error(body.error || `Request failed: ${res.status}`);
   }
   return res.json();
+}
+
+function setRuntimeStatus(runtime) {
+  const configured = Boolean(runtime?.anthropicConfigured);
+  el.runtimeStatus.classList.remove("ready", "error");
+  el.runtimeStatus.classList.add(configured ? "ready" : "error");
+  el.runtimeStatus.textContent = configured
+    ? `Anthropic connected · model ${runtime.model}`
+    : `Anthropic not configured · add ANTHROPIC_API_KEY to .env`;
 }
 
 function showToast(message) {
@@ -293,6 +303,11 @@ async function loadSettings() {
   el.watchlistInput.value = lines.join("\n");
 }
 
+async function loadRuntime() {
+  const runtime = await api("/v1/runtime");
+  setRuntimeStatus(runtime);
+}
+
 function parseWatchlistInput(raw) {
   const lines = raw
     .split("\n")
@@ -328,6 +343,7 @@ el.tabWrite.addEventListener("click", () => setTab("write"));
 el.tabUpdates.addEventListener("click", () => setTab("updates"));
 
 async function boot() {
+  await loadRuntime();
   await loadPosts();
   await loadSettings();
   await loadUpdates();

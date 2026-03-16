@@ -2,9 +2,16 @@ import { createHash, randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { aggregatePersonaIssues } from "../orchestrator/aggregate.js";
-import type { PersonaOutput, PriorityBucket } from "../orchestrator/types.js";
-import { composeDraftOptions, type ComposeMode } from "../composer/compose.js";
+import type { PriorityBucket } from "../orchestrator/types.js";
 import { classifyDriftSeverity } from "../freshness/severity.js";
+import { getAnthropicConfig } from "../lib/env.js";
+import {
+  composeWithAnthropic,
+  reviewWithAnthropic,
+  scanFreshnessWithAnthropic,
+  validatePersonaOutput,
+  type FreshnessSuggestionResult,
+} from "./anthropicService.js";
 
 type PostStatus = "draft" | "published" | "archived";
 type Visibility = "private" | "public";
@@ -118,136 +125,6 @@ function normalize(str: string): string {
   return str.trim().toLowerCase();
 }
 
-function textStats(content: string): { words: number; paragraphs: number } {
-  const words = content.trim().split(/\s+/).filter(Boolean).length;
-  const paragraphs = content
-    .split(/\n{2,}/g)
-    .map((p) => p.trim())
-    .filter(Boolean).length;
-  return { words, paragraphs };
-}
-
-function buildPersonaOutputs(content: string): PersonaOutput[] {
-  const { words, paragraphs } = textStats(content);
-  const lower = content.toLowerCase();
-  const hasAbsoluteClaims = /\b(always|never|everyone|nobody)\b/i.test(content);
-  const hasQuestion = content.includes("?");
-  const hasHeavyDash = (content.match(/—/g) ?? []).length >= 3;
-  const hasVersionMention = /\b[A-Za-z][A-Za-z0-9+-]*\s+\d+\.\d+\b/.test(content);
-
-  const outputs: PersonaOutput[] = [
-    {
-      persona: "Editor",
-      strengths: [
-        words > 120 ? "You have enough material to shape a strong article." : "The core direction is clear.",
-      ],
-      issues: [
-        ...(words < 120
-          ? [
-              {
-                priority: "now" as const,
-                issue: "The draft is short for a full article.",
-                suggestion: "Add one concrete example and one specific takeaway.",
-                evidence: `Current length is about ${words} words.`,
-                confidence: 0.86,
-              },
-            ]
-          : []),
-        ...(paragraphs < 3
-          ? [
-              {
-                priority: "soon" as const,
-                issue: "The structure is dense.",
-                suggestion: "Split ideas into 3-5 paragraphs with one key point each.",
-                confidence: 0.74,
-              },
-            ]
-          : []),
-        ...(hasHeavyDash
-          ? [
-              {
-                priority: "optional" as const,
-                issue: "Punctuation pattern feels repetitive.",
-                suggestion: "Reduce em-dash usage and vary sentence rhythm.",
-                confidence: 0.7,
-              },
-            ]
-          : []),
-      ],
-      questions: ["What should the reader remember one day later?"],
-    },
-    {
-      persona: "Skeptic",
-      strengths: ["The argument has a clear direction."],
-      issues: [
-        ...(hasAbsoluteClaims
-          ? [
-              {
-                priority: "now" as const,
-                issue: "There are absolute claims that may be too strong.",
-                suggestion: "Replace absolutes with bounded language and one supporting source.",
-                confidence: 0.81,
-              },
-            ]
-          : []),
-        ...(hasVersionMention
-          ? [
-              {
-                priority: "soon" as const,
-                issue: "Version-based claims can age quickly.",
-                suggestion: "Add a date-stamped context note to future-proof this section.",
-                confidence: 0.72,
-              },
-            ]
-          : []),
-      ],
-      questions: ["What is the strongest counterargument to your core claim?"],
-    },
-    {
-      persona: "Empath",
-      strengths: ["The intent feels authentic."],
-      issues: [
-        ...(lower.includes("you should")
-          ? [
-              {
-                priority: "soon" as const,
-                issue: "Some lines may read as prescriptive.",
-                suggestion: 'Use framing like "one option is..." to keep tone collaborative.',
-                confidence: 0.68,
-              },
-            ]
-          : []),
-      ],
-      questions: ["Which line best captures what you actually feel about this topic?"],
-    },
-    {
-      persona: "Philosopher",
-      strengths: ["There is a meaningful idea worth developing."],
-      issues: [],
-      questions: [
-        hasQuestion
-          ? "Which question in this draft deserves deeper exploration?"
-          : "What deeper question sits under this argument?",
-      ],
-    },
-    {
-      persona: "Coach",
-      strengths: ["You already have momentum."],
-      issues: [
-        {
-          priority: "optional" as const,
-          issue: "Closing could convert insight into action more directly.",
-          suggestion: "End with one concrete next step the reader can apply today.",
-          confidence: 0.62,
-        },
-      ],
-      questions: ["What is the smallest next edit that would materially improve this draft?"],
-    },
-  ];
-
-  return outputs;
-}
-
 export class AppService {
   private readonly storePath: string;
 
@@ -357,11 +234,19 @@ export class AppService {
     return revision;
   }
 
-  composeDraft(postId: string, roughInput: string, mode?: ComposeMode): RevisionRecord[] | null {
+  async composeDraft(
+    postId: string,
+    roughInput: string,
+    mode?: "argument" | "narrative" | "brief",
+  ): Promise<RevisionRecord[] | null> {
     const post = this.state.posts.find((p) => p.id === postId);
     if (!post) return null;
 
-    const options = composeDraftOptions({ roughInput, mode });
+    const options = await composeWithAnthropic({
+      title: post.title,
+      roughInput,
+      mode,
+    });
     const created: RevisionRecord[] = [];
     for (const option of options) {
       const body = `${option.titleSuggestion}\n\n${option.draft}`;
@@ -371,23 +256,29 @@ export class AppService {
     return created;
   }
 
-  triggerReviewRun(
+  async triggerReviewRun(
     postId: string,
     intensity: "gentle" | "balanced" | "rigorous" = "balanced",
-  ):
+  ): Promise<
     | {
         run: ReviewRunRecord;
         ranked: ReviewItemRecord[];
-        personaOutputs: PersonaOutput[];
+        personaOutputs: ReturnType<typeof validatePersonaOutput>[];
       }
-    | null {
+    | null
+  > {
     const post = this.state.posts.find((p) => p.id === postId);
     if (!post) return null;
 
     const latestRevision = this.getLatestRevision(postId);
     if (!latestRevision) return null;
 
-    const personaOutputs = buildPersonaOutputs(latestRevision.content);
+    const rawOutputs = await reviewWithAnthropic({
+      title: post.title,
+      content: latestRevision.content,
+      intensity,
+    });
+    const personaOutputs = rawOutputs.map((item) => validatePersonaOutput(item));
     const maxItems = intensity === "gentle" ? 3 : intensity === "rigorous" ? 8 : 5;
     const ranked = aggregatePersonaIssues(personaOutputs, { maxItems, dedupeByIssue: true });
 
@@ -456,7 +347,7 @@ export class AppService {
     return post;
   }
 
-  runFreshnessScan(postId?: string): FreshnessUpdateRecord[] {
+  async runFreshnessScan(postId?: string): Promise<FreshnessUpdateRecord[]> {
     const published = this.state.posts.filter(
       (p) => p.status === "published" && p.monitorFreshness && (!postId || p.id === postId),
     );
@@ -465,40 +356,39 @@ export class AppService {
     for (const post of published) {
       const latest = this.getLatestRevision(post.id);
       if (!latest) continue;
-      const content = latest.content;
+      let suggestions: FreshnessSuggestionResult[] = [];
 
-      const versionRegex = /\b([A-Za-z][A-Za-z0-9+\-]*)\s+(\d+\.\d+)\b/g;
-      const found = [...content.matchAll(versionRegex)];
-      for (const match of found) {
-        const product = normalize(match[1]);
-        const mentioned = match[2];
-        const knownLatest = this.state.settings.versionWatchlist[product];
-        if (!knownLatest) continue;
-        if (versionCmp(mentioned, knownLatest) >= 0) continue;
+      try {
+        suggestions = await scanFreshnessWithAnthropic({
+          title: post.title,
+          content: latest.content,
+          publishedAt: post.publishedAt,
+        });
+      } catch (error) {
+        suggestions = this.scanFreshnessFallback(latest.content);
 
-        const summary = `Version reference may be outdated: ${match[1]} ${mentioned} vs watchlist ${knownLatest}.`;
+        if (suggestions.length === 0) {
+          throw error;
+        }
+      }
+
+      for (const suggestion of suggestions) {
         const existing = this.state.freshnessUpdates.find(
           (u) =>
             u.postId === post.id &&
-            u.summary === summary &&
+            u.summary === suggestion.summary &&
             (u.status === "needs_review" || u.status === "snoozed"),
         );
         if (existing) continue;
 
-        const confidence = 0.82;
-        const severity = classifyDriftSeverity({
-          confidence,
-          claimType: "version",
-          trafficTier: "medium",
-        });
         const row: FreshnessUpdateRecord = {
           id: randomUUID(),
           postId: post.id,
-          severity,
-          confidence,
-          suggestedAction: "notice",
-          summary,
-          sourceLinks: [],
+          severity: suggestion.severity,
+          confidence: suggestion.confidence,
+          suggestedAction: suggestion.suggestedAction,
+          summary: suggestion.summary,
+          sourceLinks: suggestion.sourceLinks,
           status: "needs_review",
           createdAt: safeNow(),
         };
@@ -541,6 +431,17 @@ export class AppService {
     return this.state.settings;
   }
 
+  getRuntimeStatus(): {
+    anthropicConfigured: boolean;
+    model: string;
+  } {
+    const config = getAnthropicConfig();
+    return {
+      anthropicConfigured: Boolean(config.apiKey),
+      model: config.model,
+    };
+  }
+
   updateWatchlist(versionWatchlist: Record<string, string>): StoreState["settings"] {
     const normalized: Record<string, string> = {};
     for (const [key, value] of Object.entries(versionWatchlist)) {
@@ -559,5 +460,34 @@ export class AppService {
       .filter((r) => r.postId === postId)
       .sort((a, b) => b.revisionNumber - a.revisionNumber);
     return rows[0] ?? null;
+  }
+
+  private scanFreshnessFallback(content: string): FreshnessSuggestionResult[] {
+    const versionRegex = /\b([A-Za-z][A-Za-z0-9+\-]*)\s+(\d+\.\d+)\b/g;
+    const found = [...content.matchAll(versionRegex)];
+    const suggestions: FreshnessSuggestionResult[] = [];
+
+    for (const match of found) {
+      const product = normalize(match[1]);
+      const mentioned = match[2];
+      const knownLatest = this.state.settings.versionWatchlist[product];
+      if (!knownLatest) continue;
+      if (versionCmp(mentioned, knownLatest) >= 0) continue;
+
+      const confidence = 0.82;
+      suggestions.push({
+        summary: `Version reference may be outdated: ${match[1]} ${mentioned} vs watchlist ${knownLatest}.`,
+        severity: classifyDriftSeverity({
+          confidence,
+          claimType: "version",
+          trafficTier: "medium",
+        }),
+        confidence,
+        suggestedAction: "notice",
+        sourceLinks: [],
+      });
+    }
+
+    return suggestions;
   }
 }

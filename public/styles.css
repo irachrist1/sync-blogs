@@ -226,6 +226,27 @@ h3 {
   color: var(--muted);
 }
 
+.runtime-status {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  background: #fffdf8;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.runtime-status.ready {
+  background: var(--accent-soft);
+  border-color: #b2d4cb;
+  color: #17453d;
+}
+
+.runtime-status.error {
+  background: #f6e7e1;
+  border-color: #d8b3a5;
+  color: #7a3428;
+}
+
 .feedback-items,
 .updates-list {
   display: grid;
