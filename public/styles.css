@@ -1399,24 +1399,44 @@ textarea, input {
 
   .clarify-container {
     max-width: 100%;
+    padding: 0 4px;
+  }
+
+  .clarify-header {
+    margin-bottom: 20px;
+  }
+
+  .clarify-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .clarify-header p {
+    font-size: 0.82rem;
   }
 
   .clarify-question-card {
-    padding: 16px;
+    padding: 14px;
   }
 
   .clarify-question-card h3 {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+  }
+
+  .clarify-options {
+    gap: 6px;
   }
 
   .clarify-option {
-    font-size: 0.8rem;
-    padding: 8px 13px;
+    font-size: 0.78rem;
+    padding: 7px 12px;
+    flex-shrink: 0;
   }
 
   .clarify-footer {
     flex-direction: column-reverse;
     gap: 10px;
+    margin-top: 24px;
+    padding-top: 16px;
   }
 
   .clarify-footer .btn,
@@ -1424,5 +1444,24 @@ textarea, input {
   .clarify-footer .btn-primary-action {
     width: 100%;
     justify-content: center;
+    text-align: center;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .clarify-footer .btn-primary-action {
+    padding: 12px 16px;
+    font-size: 0.88rem;
+  }
+
+  .clarify-footer .btn-ghost-sm {
+    padding: 10px 16px;
+    font-size: 0.82rem;
+  }
+
+  .btn-progress {
+    display: block;
+    margin-left: 0;
+    margin-top: 2px;
   }
 }

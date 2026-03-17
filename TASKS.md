@@ -20,6 +20,13 @@
 - [ ] Deploy frontend to Vercel
 - [ ] Verify end-to-end: frontend (Vercel) → backend (Convex) → Anthropic API
 
+## Real-Time Agent Progress (post-Convex)
+- [ ] Add SSE/streaming endpoint for compose & review operations
+- [ ] Backend emits granular progress events (e.g. "Parsing notes", "Calling Anthropic", "Building drafts")
+- [ ] Frontend replaces timed guess messages with real agent status from stream
+- [ ] Loading button text directly correlates to what the backend agent is actually doing
+- [ ] Works for both "Generate with these answers" and "Review this draft" flows
+
 ## Git / Push
 - [ ] Decide branch strategy (push to `main` or merge `wip/resume-2026-03-03` → `main`)
 - [ ] Push landing page fixes
