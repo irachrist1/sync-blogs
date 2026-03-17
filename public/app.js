@@ -335,8 +335,8 @@ async function api(path, options = {}) {
     headers["Authorization"] = `Bearer ${state.token}`;
   }
   const res = await fetch(path, { headers, ...options });
-  if (res.status === 401) {
-    // Session expired
+  if (res.status === 401 && !path.startsWith("/v1/auth/")) {
+    // Session expired — but not on login/register endpoints
     state.token = null;
     state.user = null;
     localStorage.removeItem("sync_token");
