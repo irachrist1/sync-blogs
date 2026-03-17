@@ -1,0 +1,110 @@
+[2026-03-17T07:12:20.216Z] [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[2026-03-17T07:12:20.357Z] [log] [HMR] connected
+[2026-03-17T07:12:39.551Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:12:39.695Z] [log] [Fast Refresh] done in 247ms
+[2026-03-17T07:12:40.115Z] [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[2026-03-17T07:12:40.170Z] [log] [HMR] connected
+[2026-03-17T07:13:18.030Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:13:18.766Z] [log] [Fast Refresh] done in 839ms
+[2026-03-17T07:13:19.205Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:13:19.466Z] [log] [Fast Refresh] done in 358ms
+[2026-03-17T07:18:02.371Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:18:03.054Z] [log] [Fast Refresh] done in 788ms
+[2026-03-17T07:18:04.509Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:18:04.602Z] [log] [Fast Refresh] done in 323ms
+[2026-03-17T07:23:23.330Z] [error] Failed to generate drafts: Error: Field name Do you want to include a personal story — like a specific team or pipeline you've seen this play out with? has invalid character '—': Field names can only contain non-control ASCII characters
+    at validateObjectField (http://localhost:3000/_next/static/chunks/node_modules_37ac4981._.js:2497:19)
+    at convexToJsonInternal (http://localhost:3000/_next/static/chunks/node_modules_37ac4981._.js:2647:13)
+    at convexToJsonInternal (http://localhost:3000/_next/static/chunks/node_modules_37ac4981._.js:2648:22)
+    at convexToJson (http://localhost:3000/_next/static/chunks/node_modules_37ac4981._.js:2676:12)
+    at BaseConvexClient.actionInternal (http://localhost:3000/_next/static/chunks/node_modules_37ac4981._.js:6970:193)
+    at BaseConvexClient.action (http://localhost:3000/_next/static/chunks/node_modules_37ac4981._.js:6948:35)
+    at ConvexReactClient.action (http://localhost:3000/_next/static/chunks/node_modules_37ac4981._.js:8649:26)
+    at http://localhost:3000/_next/static/chunks/node_modules_37ac4981._.js:8389:23
+    at handleGenerateDrafts (http://localhost:3000/_next/static/chunks/src_62b565bb._.js:874:34)
+[2026-03-17T07:24:31.097Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:24:31.476Z] [log] [Fast Refresh] done in 457ms
+[2026-03-17T07:25:07.359Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:25:07.396Z] [log] [Fast Refresh] done in 139ms
+[2026-03-17T07:25:07.652Z] [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[2026-03-17T07:25:07.724Z] [log] [HMR] connected
+[2026-03-17T07:26:51.429Z] [error] [CONVEX A(ai:composeDrafts)] [Request ID: ba2df4a9b8a41ff5] Server Error
+Uncaught Error: Uncaught InvalidCharacterError: Failed to execute 'btoa': The string to be encoded contains characters outside of the Latin1 range.
+    at handler (../convex/revisions.ts:74:8)
+
+    at async handler (../convex/ai.ts:223:6)
+
+[2026-03-17T07:26:51.431Z] [error] Failed to generate drafts: Error: [CONVEX A(ai:composeDrafts)] [Request ID: ba2df4a9b8a41ff5] Server Error
+Uncaught Error: Uncaught InvalidCharacterError: Failed to execute 'btoa': The string to be encoded contains characters outside of the Latin1 range.
+    at handler (../convex/revisions.ts:74:8)
+
+    at async handler (../convex/ai.ts:223:6)
+
+  Called by client
+    at handler (../convex/revisions.ts:74:8)
+
+    at async handler (../convex/ai.ts:223:6)
+
+  Called by client
+    at BaseConvexClient.action (http://localhost:3000/_next/static/chunks/node_modules_37ac4981._.js:6953:19)
+    at async handleGenerateDrafts (http://localhost:3000/_next/static/chunks/src_62b565bb._.js:876:28)
+[2026-03-17T07:28:11.384Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:28:11.384Z] [log] [Fast Refresh] done in 103ms
+[2026-03-17T07:28:32.086Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:28:32.090Z] [log] [Fast Refresh] done in 107ms
+[2026-03-17T07:29:10.063Z] [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[2026-03-17T07:29:10.290Z] [log] [HMR] connected
+[2026-03-17T07:31:30.524Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:31:31.098Z] [log] [Fast Refresh] done in 680ms
+[2026-03-17T07:32:02.584Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:32:02.809Z] [log] [Fast Refresh] done in 327ms
+[2026-03-17T07:33:18.667Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:33:18.903Z] [log] [Fast Refresh] done in 200ms
+[2026-03-17T07:33:21.222Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:33:21.237Z] [log] [Fast Refresh] done in 117ms
+[2026-03-17T07:33:21.401Z] [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[2026-03-17T07:33:21.481Z] [log] [HMR] connected
+[2026-03-17T07:33:38.430Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:33:38.458Z] [log] [Fast Refresh] done in 54ms
+[2026-03-17T07:33:48.990Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:33:49.020Z] [log] [Fast Refresh] done in 26ms
+[2026-03-17T07:34:01.360Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:34:01.388Z] [log] [Fast Refresh] done in 63ms
+[2026-03-17T07:34:36.921Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:34:36.990Z] [log] [Fast Refresh] done in 172ms
+[2026-03-17T07:34:37.143Z] [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[2026-03-17T07:34:37.206Z] [log] [HMR] connected
+[2026-03-17T07:34:38.252Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:34:38.255Z] [log] [Fast Refresh] done in 105ms
+[2026-03-17T07:34:47.728Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:34:47.937Z] [log] [Fast Refresh] done in 311ms
+[2026-03-17T07:35:01.046Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:35:01.085Z] [log] [Fast Refresh] done in 141ms
+[2026-03-17T07:35:01.264Z] [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[2026-03-17T07:35:01.342Z] [log] [HMR] connected
+[2026-03-17T07:35:47.964Z] [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[2026-03-17T07:35:48.018Z] [log] [HMR] connected
+[2026-03-17T07:36:12.273Z] [info] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[2026-03-17T07:36:12.300Z] [log] [HMR] connected
+[2026-03-17T07:45:01.125Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:45:01.178Z] [log] [Fast Refresh] done in 164ms
+[2026-03-17T07:45:19.755Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:45:19.783Z] [log] [Fast Refresh] done in 43ms
+[2026-03-17T07:46:00.442Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:46:00.543Z] [log] [Fast Refresh] done in 125ms
+[2026-03-17T07:47:01.204Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:47:01.263Z] [log] [Fast Refresh] done in 54ms
+[2026-03-17T07:47:11.253Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:47:11.284Z] [log] [Fast Refresh] done in 67ms
+[2026-03-17T07:47:31.101Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:47:31.133Z] [log] [Fast Refresh] done in 62ms
+[2026-03-17T07:47:50.554Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:47:50.582Z] [log] [Fast Refresh] done in 66ms
+[2026-03-17T07:48:03.834Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:48:03.860Z] [log] [Fast Refresh] done in 46ms
+[2026-03-17T07:48:12.125Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:48:12.155Z] [log] [Fast Refresh] done in 62ms
+[2026-03-17T07:49:17.414Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:49:17.430Z] [log] [Fast Refresh] done in 121ms
+[2026-03-17T07:50:26.363Z] [log] [Fast Refresh] rebuilding
+[2026-03-17T07:50:26.578Z] [log] [Fast Refresh] done in 306ms
