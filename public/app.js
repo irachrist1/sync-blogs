@@ -876,14 +876,12 @@ function renderClarifyingQuestions() {
 
 el.clarifySkipBtn.addEventListener("click", async () => {
   state.clarifyingAnswers = {};
-  setButtonLoading(el.clarifySubmitBtn, true);
+  startGenerateUI(el.clarifySubmitBtn);
   await generateDrafts();
-  setButtonLoading(el.clarifySubmitBtn, false);
+  stopGenerateUI(el.clarifySubmitBtn);
 });
 
 el.clarifySubmitBtn.addEventListener("click", async () => {
-  // Map question IDs to question text for the API
-  // Answers may be arrays (multi-select) — join them for the prompt
   const answersWithText = {};
   for (const q of state.clarifyingQuestions) {
     const answer = state.clarifyingAnswers[q.id];
@@ -895,10 +893,52 @@ el.clarifySubmitBtn.addEventListener("click", async () => {
       }
     }
   }
-  setButtonLoading(el.clarifySubmitBtn, true);
+  startGenerateUI(el.clarifySubmitBtn);
   await generateDrafts(answersWithText);
-  setButtonLoading(el.clarifySubmitBtn, false);
+  stopGenerateUI(el.clarifySubmitBtn);
 });
+
+/* ===== GENERATE UI FEEDBACK ===== */
+var generateTimer = null;
+var generateStartTime = 0;
+
+function startGenerateUI(btn) {
+  setButtonLoading(btn, true);
+  btn.classList.add("is-generating");
+  var label = btn.querySelector(".btn-label");
+  if (label) label.textContent = "Writing your draft\u2026";
+  generateStartTime = Date.now();
+
+  var progress = document.getElementById("generate-progress");
+  if (progress) {
+    progress.classList.remove("hidden");
+    progress.textContent = "";
+  }
+
+  generateTimer = setInterval(function () {
+    var elapsed = Math.floor((Date.now() - generateStartTime) / 1000);
+    if (progress) {
+      if (elapsed < 5) progress.textContent = "";
+      else if (elapsed < 15) progress.textContent = elapsed + "s";
+      else if (elapsed < 30) progress.textContent = elapsed + "s \u2014 crafting\u2026";
+      else if (elapsed < 50) progress.textContent = elapsed + "s \u2014 almost there\u2026";
+      else progress.textContent = elapsed + "s \u2014 finishing up\u2026";
+    }
+    if (label && elapsed >= 10 && elapsed < 20) label.textContent = "Analyzing your notes\u2026";
+    if (label && elapsed >= 20 && elapsed < 40) label.textContent = "Composing drafts\u2026";
+    if (label && elapsed >= 40) label.textContent = "Polishing the output\u2026";
+  }, 1000);
+}
+
+function stopGenerateUI(btn) {
+  if (generateTimer) { clearInterval(generateTimer); generateTimer = null; }
+  setButtonLoading(btn, false);
+  btn.classList.remove("is-generating");
+  var label = btn.querySelector(".btn-label");
+  if (label) label.textContent = "Generate with these answers";
+  var progress = document.getElementById("generate-progress");
+  if (progress) { progress.classList.add("hidden"); progress.textContent = ""; }
+}
 
 /* ===== GENERATE DRAFTS ===== */
 async function generateDrafts(clarifyingAnswers) {

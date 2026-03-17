@@ -126,17 +126,19 @@
         <section id="clarify-state" class="center-state hidden">
           <div class="clarify-container">
             <div class="clarify-header">
+              <span class="clarify-eyebrow">✦ Quick questions</span>
               <h2>Before I write this up...</h2>
-              <p>A few quick questions to make sure I get this right.</p>
+              <p>A few quick questions to make sure the draft matches what you have in mind.</p>
             </div>
             <div id="clarify-questions" class="clarify-questions">
               <!-- Dynamically populated -->
             </div>
             <div class="clarify-footer">
-              <button id="clarify-skip-btn" class="btn">Skip — just generate</button>
+              <button id="clarify-skip-btn" class="btn btn-ghost-sm">Skip — just generate</button>
               <button id="clarify-submit-btn" class="btn btn-primary-action">
                 <span class="btn-label">Generate with these answers</span>
                 <span class="btn-spinner hidden"></span>
+                <span class="btn-progress hidden" id="generate-progress"></span>
               </button>
             </div>
           </div>

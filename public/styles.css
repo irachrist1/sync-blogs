@@ -678,49 +678,68 @@ textarea, input {
 }
 
 /* Clarifying questions state */
+/* ── Clarify questions — redesigned ──────────────────────────── */
 .clarify-container {
   width: 100%;
-  max-width: 640px;
+  max-width: 680px;
 }
 
 .clarify-header {
-  margin-bottom: 28px;
+  margin-bottom: 32px;
+}
+
+.clarify-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 10px;
 }
 
 .clarify-header h2 {
   font-family: "Newsreader", serif;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 500;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .clarify-header p {
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
 }
 
 .clarify-questions {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 28px;
 }
 
 .clarify-question-card {
   animation: fadeInUp 300ms var(--ease);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 20px;
 }
 
 .clarify-question-card h3 {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   color: var(--ink);
+  line-height: 1.45;
 }
 
 .clarify-hint {
-  margin: 0 0 4px;
-  font-size: 0.8rem;
+  margin: 0 0 6px;
+  font-size: 0.75rem;
   color: var(--ink-faint);
-  font-weight: 400;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .clarify-options {
@@ -730,19 +749,21 @@ textarea, input {
 }
 
 .clarify-option {
-  padding: 8px 16px;
+  padding: 9px 16px;
   border: 1.5px solid var(--line);
   border-radius: 999px;
-  background: var(--paper);
+  background: var(--bg);
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 0.84rem;
   font-weight: 500;
   color: var(--ink-light);
   transition: all var(--duration) var(--ease);
+  line-height: 1.3;
 }
 
 .clarify-option:hover {
   border-color: var(--accent-muted);
+  background: var(--paper);
 }
 
 .clarify-option.selected {
@@ -752,19 +773,24 @@ textarea, input {
 }
 
 .clarify-custom-input {
-  margin-top: 8px;
+  margin-top: 10px;
   width: 100%;
-  padding: 8px 12px;
+  padding: 10px 14px;
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 0.875rem;
   background: var(--bg);
   color: var(--ink);
   outline: none;
+  transition: border-color var(--duration) var(--ease);
 }
 
 .clarify-custom-input:focus {
   border-color: var(--accent);
+}
+
+.clarify-custom-input::placeholder {
+  color: var(--ink-faint);
 }
 
 .clarify-footer {
@@ -773,6 +799,52 @@ textarea, input {
   align-items: center;
   margin-top: 32px;
   gap: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.btn-ghost-sm {
+  background: none;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  padding: 10px 20px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--duration) var(--ease);
+}
+.btn-ghost-sm:hover {
+  border-color: var(--ink-light);
+  color: var(--ink);
+}
+
+/* Generate button progress indicator */
+.btn-progress {
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.8;
+  margin-left: 4px;
+}
+
+.btn-primary-action.is-generating {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary-action.is-generating::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: rgba(255,255,255,0.4);
+  animation: generateProgress 60s linear;
+}
+
+@keyframes generateProgress {
+  from { width: 0; }
+  to { width: 100%; }
 }
 
 /* Draft options state */
@@ -1323,5 +1395,34 @@ textarea, input {
   .modal {
     margin: 16px;
     max-height: 90vh;
+  }
+
+  .clarify-container {
+    max-width: 100%;
+  }
+
+  .clarify-question-card {
+    padding: 16px;
+  }
+
+  .clarify-question-card h3 {
+    font-size: 0.9rem;
+  }
+
+  .clarify-option {
+    font-size: 0.8rem;
+    padding: 8px 13px;
+  }
+
+  .clarify-footer {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .clarify-footer .btn,
+  .clarify-footer .btn-ghost-sm,
+  .clarify-footer .btn-primary-action {
+    width: 100%;
+    justify-content: center;
   }
 }
