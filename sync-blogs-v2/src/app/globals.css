@@ -470,6 +470,7 @@
   font-size: 1.05rem;
   line-height: 1.8;
   color: var(--color-ink);
+  overflow: hidden;
   resize: none;
   padding: 12px 0;
   font-family: "Manrope", system-ui, sans-serif;
@@ -1376,4 +1377,71 @@
   .editor-panel-layout .editor-container {
     border-right: none;
   }
+}
+
+/* ── Editor split pane ── */
+.editor-split-pane {
+  display: flex;
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+  border: 1px solid var(--color-line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.editor-split-left {
+  flex: 1;
+  border-right: 1px solid var(--color-line);
+  display: flex;
+  flex-direction: column;
+}
+
+.editor-split-left .content-input {
+  border: none;
+  border-radius: 0;
+  flex: 1;
+  min-height: 400px;
+}
+
+.editor-split-right {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+}
+
+/* ── Review panel pending state ── */
+.review-item-pending {
+  font-size: 0.72rem;
+  color: var(--color-muted-app);
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+/* ── Settings profile inputs ── */
+.settings-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--color-line);
+  border-radius: 6px;
+  background: var(--color-paper);
+  font-size: 0.875rem;
+  color: var(--color-ink);
+  outline: none;
+  transition: border-color 150ms;
+  font-family: "Manrope", system-ui, sans-serif;
+}
+.settings-input:focus {
+  border-color: var(--color-accent-app);
+}
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.settings-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-ink-light);
 }

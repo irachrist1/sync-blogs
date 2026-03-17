@@ -1,12 +1,11 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
+import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
 
 const MODEL_OPTIONS = [
@@ -15,21 +14,63 @@ const MODEL_OPTIONS = [
   { value: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5", desc: "Fastest · Cheapest" },
 ];
 
+
 export default function SettingsPage() {
   const { user } = useCurrentUser();
   const router = useRouter();
 
   const updatePreferredModel = useMutation(api.users.updatePreferredModel);
+  const updateWritingProfile = useMutation(
+    (api.users as any).updateWritingProfile
+  );
 
   const [modelSaved, setModelSaved] = useState(false);
+  const [profileSaved, setProfileSaved] = useState(false);
 
   const profile = user?.writingProfile;
   const currentModel = user?.preferredModel ?? "claude-sonnet-4-6";
+
+  // Writing profile input state (comma-separated strings)
+  const [toneInput, setToneInput] = useState<string>(() =>
+    profile?.tone?.join(", ") ?? ""
+  );
+  const [sentenceStyleInput, setSentenceStyleInput] = useState<string>(() =>
+    profile?.sentenceStyle?.join(", ") ?? ""
+  );
+  const [structureInput, setStructureInput] = useState<string>(() =>
+    profile?.structure?.join(", ") ?? ""
+  );
+  const [lengthInput, setLengthInput] = useState<string>(() =>
+    profile?.lengthPreference?.join(", ") ?? ""
+  );
+  const [destinationInput, setDestinationInput] = useState<string>(() =>
+    profile?.destination?.join(", ") ?? ""
+  );
 
   const handleModelChange = async (model: string) => {
     await updatePreferredModel({ preferredModel: model });
     setModelSaved(true);
     setTimeout(() => setModelSaved(false), 2000);
+  };
+
+  const splitInput = (val: string): string[] =>
+    val
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+  const handleSaveProfile = async () => {
+    await updateWritingProfile({
+      writingProfile: {
+        tone: splitInput(toneInput),
+        sentenceStyle: splitInput(sentenceStyleInput),
+        structure: splitInput(structureInput),
+        lengthPreference: splitInput(lengthInput),
+        destination: splitInput(destinationInput),
+      },
+    });
+    setProfileSaved(true);
+    setTimeout(() => setProfileSaved(false), 2000);
   };
 
   if (!user) return null;
@@ -53,30 +94,73 @@ export default function SettingsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            {profile ? (
-              <div className="space-y-3">
-                {Object.entries(profile).map(([key, values]) => {
-                  if (!values || (Array.isArray(values) && values.length === 0))
-                    return null;
-                  return (
-                    <div key={key}>
-                      <p className="text-xs text-muted-app capitalize mb-1">
-                        {key.replace(/([A-Z])/g, " $1")}
-                      </p>
-                      <div className="flex flex-wrap gap-1">
-                        {(values as string[]).map((v) => (
-                          <Badge key={v} variant="secondary" className="text-xs">
-                            {v}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-app">No profile set up yet.</p>
-            )}
+            <p className="text-sm text-muted-app mb-4">
+              Edit your writing preferences. Separate values with commas.
+            </p>
+
+            <div className="settings-field">
+              <label className="settings-label">Tone</label>
+              <input
+                type="text"
+                className="settings-input"
+                value={toneInput}
+                onChange={(e) => setToneInput(e.target.value)}
+                placeholder="conversational, formal, analytical"
+              />
+            </div>
+
+            <div className="settings-field">
+              <label className="settings-label">Sentence Style</label>
+              <input
+                type="text"
+                className="settings-input"
+                value={sentenceStyleInput}
+                onChange={(e) => setSentenceStyleInput(e.target.value)}
+                placeholder="short and punchy, flowing, varied"
+              />
+            </div>
+
+            <div className="settings-field">
+              <label className="settings-label">Structure</label>
+              <input
+                type="text"
+                className="settings-input"
+                value={structureInput}
+                onChange={(e) => setStructureInput(e.target.value)}
+                placeholder="listicle, narrative, essay"
+              />
+            </div>
+
+            <div className="settings-field">
+              <label className="settings-label">Length</label>
+              <input
+                type="text"
+                className="settings-input"
+                value={lengthInput}
+                onChange={(e) => setLengthInput(e.target.value)}
+                placeholder="short, medium, long-form"
+              />
+            </div>
+
+            <div className="settings-field">
+              <label className="settings-label">Where you publish</label>
+              <input
+                type="text"
+                className="settings-input"
+                value={destinationInput}
+                onChange={(e) => setDestinationInput(e.target.value)}
+                placeholder="Substack, personal blog, Medium"
+              />
+            </div>
+
+            <div className="flex items-center gap-3 mt-2">
+              <Button onClick={handleSaveProfile} size="sm">
+                Save profile
+              </Button>
+              {profileSaved && (
+                <span className="text-xs text-[var(--color-accent-app)]">Saved.</span>
+              )}
+            </div>
           </CardContent>
         </Card>
 

@@ -59,7 +59,7 @@ export function PostEditor({ postId, post }: PostEditorProps) {
   const [isReviewing, setIsReviewing] = useState(false);
   const [reviewError, setReviewError] = useState<string | null>(null);
   const [isScanning, setIsScanning] = useState(false);
-  const [viewMode, setViewMode] = useState<"edit" | "preview">("edit");
+  const [viewMode, setViewMode] = useState<"edit" | "preview" | "split">("split");
   const [reviewPanelOpen, setReviewPanelOpen] = useState(false);
   const [applyingItemId, setApplyingItemId] = useState<Id<"reviewItems"> | null>(null);
 
@@ -228,6 +228,14 @@ export function PostEditor({ postId, post }: PostEditorProps) {
     }
   }, [title]);
 
+  const contentRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.style.height = "auto";
+      contentRef.current.style.height = contentRef.current.scrollHeight + "px";
+    }
+  }, [content]);
+
   const isPublished = post.status === "published";
   const isGeneratedDraft = post.latestRevision?.source === "generated";
   const reviewLabel = hasCompletedReview ? "View review" : "Review this draft";
@@ -275,6 +283,12 @@ export function PostEditor({ postId, post }: PostEditorProps) {
             Edit
           </button>
           <button
+            className={`editor-tab${viewMode === "split" ? " active" : ""}`}
+            onClick={() => setViewMode("split")}
+          >
+            Split
+          </button>
+          <button
             className={`editor-tab${viewMode === "preview" ? " active" : ""}`}
             onClick={() => setViewMode("preview")}
           >
@@ -296,8 +310,30 @@ export function PostEditor({ postId, post }: PostEditorProps) {
               <span className="streaming-cursor" />
             </div>
           </div>
+        ) : viewMode === "split" ? (
+          <div className="editor-split-pane">
+            <div className="editor-split-left">
+              <textarea
+                ref={contentRef}
+                value={content}
+                onChange={(e) => handleContentChange(e.target.value)}
+                placeholder="Start writing..."
+                className="content-input"
+              />
+            </div>
+            <div className="editor-split-right">
+              <div className="content-preview">
+                {content ? (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+                ) : (
+                  <p className="content-preview-empty">Preview will appear here.</p>
+                )}
+              </div>
+            </div>
+          </div>
         ) : viewMode === "edit" ? (
           <textarea
+            ref={contentRef}
             value={content}
             onChange={(e) => handleContentChange(e.target.value)}
             placeholder="Start writing..."
@@ -427,6 +463,9 @@ export function PostEditor({ postId, post }: PostEditorProps) {
                     )}
                     {!isResolved && (
                       <div className="review-item-actions">
+                        {!!applyingItemId && !isApplying && (
+                          <p className="review-item-pending">Fix in progress for another item…</p>
+                        )}
                         <button
                           className={`review-action-accept${isApplying ? " is-applying" : ""}`}
                           onClick={() => handleGotIt(item)}
@@ -437,7 +476,7 @@ export function PostEditor({ postId, post }: PostEditorProps) {
                         <button
                           className="review-action-dismiss"
                           onClick={() => handleSkip(item._id)}
-                          disabled={!!applyingItemId}
+                          disabled={isApplying}
                         >
                           Skip
                         </button>
