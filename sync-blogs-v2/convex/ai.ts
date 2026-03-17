@@ -260,8 +260,26 @@ export const composeDrafts = action({
       message: "AI is writing drafts...",
     });
 
+    // Task 4: Cached system prompt for composeDrafts
+    const systemContent: any[] = [
+      {
+        type: "text",
+        text: "Output strict JSON only. No markdown. No explanation before or after the JSON object.",
+        cache_control: { type: "ephemeral" },
+      },
+    ];
+
     let messages: Anthropic.MessageParam[] = [
-      { role: "user", content: prompt },
+      {
+        role: "user",
+        content: [
+          {
+            type: "text",
+            text: prompt,
+            cache_control: { type: "ephemeral" },
+          },
+        ],
+      },
     ];
     let fullText = "";
 
@@ -270,19 +288,37 @@ export const composeDrafts = action({
     for (let attempt = 0; attempt < 3; attempt++) {
       console.log(`[compose] API call attempt ${attempt + 1}/3, max_tokens: 20000`);
 
-      const response = await client.messages.create({
-        model,
-        max_tokens: 20000,
-        temperature: 0.7,
-        system:
-          "Output strict JSON only. No markdown. No explanation before or after the JSON object.",
-        messages,
-      });
+      const response = await client.messages.create(
+        {
+          model,
+          max_tokens: 20000,
+          temperature: 0.7,
+          system: systemContent,
+          messages,
+        },
+        {
+          headers: { "anthropic-beta": "prompt-caching-2024-07-31" },
+        }
+      );
 
       const chunk = readText(response);
       fullText += chunk;
 
       console.log(`[compose] Attempt ${attempt + 1}: got ${chunk.length} chars, stop_reason: ${response.stop_reason}, usage: input=${response.usage.input_tokens} output=${response.usage.output_tokens}`);
+
+      // Task 2: Log token usage for each attempt
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ctx.runMutation((api as any).tokenUsage.logUsage, {
+        postId: args.postId,
+        userId: args.userId,
+        action: "compose",
+        model,
+        inputTokens: response.usage.input_tokens,
+        outputTokens: response.usage.output_tokens,
+        cacheReadTokens: (response.usage as any).cache_read_input_tokens ?? 0,
+        cacheWriteTokens: (response.usage as any).cache_creation_input_tokens ?? 0,
+        createdAt: Date.now(),
+      }).catch(() => {});  // never throw on logging failure
 
       if (response.stop_reason === "end_turn") break;
 
@@ -362,6 +398,7 @@ export const runReview = action({
       v.literal("balanced"),
       v.literal("rigorous")
     ),
+    writingProfile: v.optional(v.any()),  // Task 3
   },
   handler: async (ctx, args) => {
     console.log("[review] Starting review for post:", args.postId);
@@ -379,6 +416,14 @@ export const runReview = action({
       progress: 10,
       message: "Starting review...",
     });
+
+    // Task 3: Extract formattingAvoid and build constraint string
+    const formattingAvoidList = Array.isArray(args.writingProfile?.formattingAvoid)
+      ? args.writingProfile.formattingAvoid as string[]
+      : [];
+    const avoidInstruction = formattingAvoidList.length > 0
+      ? `\n\nIMPORTANT: The writer explicitly avoids these styles: ${formattingAvoidList.join(", ")}. When writing suggestions, do NOT suggest or introduce these patterns.${formattingAvoidList.includes("em-dashes") ? " Never use em-dashes (—) in your feedback text." : ""}`
+      : "";
 
     const personas = [
       {
@@ -407,40 +452,56 @@ export const runReview = action({
     const results = await Promise.all(
       personas.map(async (persona, idx) => {
         console.log(`[review] Running persona: ${persona.name}`);
-        const response = await client.messages.create({
-          model,
-          max_tokens: 2000,
-          temperature: 0.4,
-          system: [
-            `You are a writing reviewer called "${persona.name}" in a private blogging app.`,
-            `Your focus: ${persona.role}`,
-            "",
-            "IMPORTANT TONE RULES:",
-            "- Write like a smart friend giving feedback over coffee, NOT like an AI.",
-            '- Use first person: "I noticed...", "I think...", "How about..."',
-            "- Be specific — quote the exact words or section you're referring to.",
-            "- Keep each issue to 1-2 sentences. No filler, no flattery, no hedging.",
-            "- Don't repeat yourself. Each item must be a distinct, actionable point.",
-            `- Return at most ${maxItems} items. Only the most impactful ones.`,
-            "- If the writing is good, return fewer items. Don't invent problems.",
-            "",
-            "Return strict JSON only.",
-            "Required shape:",
-            `{"persona":"${persona.id}","items":[{"priority":"now|soon|optional","issue":"string","suggestion":"string","evidence":"optional quoted text from the draft","confidence":0.0-1.0}]}`,
-            "",
-            "Examples of good issue/suggestion pairs:",
-            '- issue: "Your opening feels generic — \\"In today\'s world\\" doesn\'t hook anyone."',
-            '  suggestion: "Try leading with your strongest claim or a surprising stat."',
-            '- issue: "I noticed you mention \\"studies show\\" twice without citing anything specific."',
-            '  suggestion: "Either name the study or drop the appeal to authority — your argument is strong enough without it."',
-          ].join("\n"),
-          messages: [
-            {
-              role: "user",
-              content: `Title: ${args.title}\n\nDraft:\n${args.content}`,
-            },
-          ],
-        });
+
+        // Task 4: Cached system prompt for each persona call
+        const systemContent: any[] = [
+          {
+            type: "text",
+            text: [
+              `You are a writing reviewer called "${persona.name}" in a private blogging app.`,
+              `Your focus: ${persona.role}`,
+              "",
+              "IMPORTANT TONE RULES:",
+              "- Write like a smart friend giving feedback over coffee, NOT like an AI.",
+              '- Use first person: "I noticed...", "I think...", "How about..."',
+              "- Be specific — quote the exact words or section you're referring to.",
+              "- Keep each issue to 1-2 sentences. No filler, no flattery, no hedging.",
+              "- Don't repeat yourself. Each item must be a distinct, actionable point.",
+              `- Return at most ${maxItems} items. Only the most impactful ones.`,
+              "- If the writing is good, return fewer items. Don't invent problems.",
+              "",
+              "Return strict JSON only.",
+              "Required shape:",
+              `{"persona":"${persona.id}","items":[{"priority":"now|soon|optional","issue":"string","suggestion":"string","evidence":"optional quoted text from the draft","confidence":0.0-1.0}]}`,
+              "",
+              "Examples of good issue/suggestion pairs:",
+              '- issue: "Your opening feels generic — \\"In today\'s world\\" doesn\'t hook anyone."',
+              '  suggestion: "Try leading with your strongest claim or a surprising stat."',
+              '- issue: "I noticed you mention \\"studies show\\" twice without citing anything specific."',
+              '  suggestion: "Either name the study or drop the appeal to authority — your argument is strong enough without it."',
+              avoidInstruction,
+            ].join("\n"),
+            cache_control: { type: "ephemeral" },
+          },
+        ];
+
+        const response = await client.messages.create(
+          {
+            model,
+            max_tokens: 2000,
+            temperature: 0.4,
+            system: systemContent,
+            messages: [
+              {
+                role: "user",
+                content: `Title: ${args.title}\n\nDraft:\n${args.content}`,
+              },
+            ],
+          },
+          {
+            headers: { "anthropic-beta": "prompt-caching-2024-07-31" },
+          }
+        );
 
         await ctx.runMutation(api.taskProgress.upsertProgress, {
           postId: args.postId,
@@ -453,6 +514,20 @@ export const runReview = action({
 
         const rawText = readText(response);
         console.log(`[review] ${persona.name} done: ${rawText.length} chars, usage: input=${response.usage.input_tokens} output=${response.usage.output_tokens}`);
+
+        // Task 2: Log token usage for each persona
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ctx.runMutation((api as any).tokenUsage.logUsage, {
+          postId: args.postId,
+          userId: args.userId,
+          action: "review",
+          model,
+          inputTokens: response.usage.input_tokens,
+          outputTokens: response.usage.output_tokens,
+          cacheReadTokens: (response.usage as any).cache_read_input_tokens ?? 0,
+          cacheWriteTokens: (response.usage as any).cache_creation_input_tokens ?? 0,
+          createdAt: Date.now(),
+        }).catch(() => {});  // never throw on logging failure
 
         return parseJson<{
           persona: string;
@@ -520,11 +595,17 @@ export const applyReviewFix = action({
     content: v.string(),
     issue: v.string(),
     suggestion: v.string(),
+    writingProfile: v.optional(v.any()),  // Task 3
   },
   handler: async (ctx, args) => {
     console.log("[apply-fix] Applying review fix for item:", args.itemId);
     const client = getClient();
     const model = await getModelForUser(ctx, args.userId);
+
+    // Task 3: Extract formattingAvoid
+    const formattingAvoidList = Array.isArray(args.writingProfile?.formattingAvoid)
+      ? args.writingProfile.formattingAvoid as string[]
+      : [];
 
     // Initialise progress so the frontend can subscribe to stream updates
     await ctx.runMutation(api.taskProgress.upsertProgress, {
@@ -551,6 +632,7 @@ export const applyReviewFix = action({
         "Apply ONLY that specific change. Do not rewrite, restructure, or alter anything else.",
         "Preserve the author's voice, formatting, and all other content exactly as-is.",
         "Return the complete modified article text and nothing else — no preamble, no commentary.",
+        ...(formattingAvoidList.length > 0 ? [`The writer avoids: ${formattingAvoidList.join(", ")}. Preserve this in your output.`] : []),
       ].join("\n"),
       messages: [
         {
@@ -588,6 +670,25 @@ export const applyReviewFix = action({
       taskType: "review",
       streamContent: newContent,
     });
+
+    // Task 2: Log token usage for applyReviewFix (get final message from stream)
+    try {
+      const finalMessage = await stream.finalMessage();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ctx.runMutation((api as any).tokenUsage.logUsage, {
+        postId: args.postId,
+        userId: args.userId,
+        action: "applyFix",
+        model,
+        inputTokens: finalMessage.usage.input_tokens,
+        outputTokens: finalMessage.usage.output_tokens,
+        cacheReadTokens: (finalMessage.usage as any).cache_read_input_tokens ?? 0,
+        cacheWriteTokens: (finalMessage.usage as any).cache_creation_input_tokens ?? 0,
+        createdAt: Date.now(),
+      }).catch(() => {});  // never throw on logging failure
+    } catch {
+      // Don't let token logging failure break the apply fix
+    }
 
     await ctx.runMutation(api.revisions.saveRevision, {
       postId: args.postId,
@@ -670,6 +771,20 @@ export const scanFreshness = action({
 
     console.log("[freshness] Response stop_reason:", response.stop_reason);
     const finalText = readText(response);
+
+    // Task 2: Log token usage for scanFreshness
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ctx.runMutation((api as any).tokenUsage.logUsage, {
+      postId: args.postId,
+      userId: args.userId,
+      action: "freshness",
+      model,
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
+      cacheReadTokens: (response.usage as any).cache_read_input_tokens ?? 0,
+      cacheWriteTokens: (response.usage as any).cache_creation_input_tokens ?? 0,
+      createdAt: Date.now(),
+    }).catch(() => {});  // never throw on logging failure
 
     const parsed = parseJson<{
       suggestions: Array<{

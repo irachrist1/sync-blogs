@@ -164,4 +164,17 @@ export default defineSchema({
   })
     .index("by_post_type", ["postId", "taskType"])
     .index("by_user", ["userId"]),
+
+  tokenUsage: defineTable({
+    postId: v.id("posts"),
+    userId: v.id("users"),
+    action: v.string(),      // "compose", "review", "freshness", "applyFix", "clarify"
+    model: v.string(),
+    inputTokens: v.number(),
+    outputTokens: v.number(),
+    cacheReadTokens: v.optional(v.number()),
+    cacheWriteTokens: v.optional(v.number()),
+    createdAt: v.number(),
+  }).index("by_post", ["postId"])
+    .index("by_user", ["userId"]),
 });
