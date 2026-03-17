@@ -104,12 +104,71 @@ export const saveDraftProgress = mutation({
       roughInput: v.optional(v.string()),
       clarifyingQuestions: v.optional(v.any()),
       clarifyingAnswers: v.optional(v.any()),
+      draftChosen: v.optional(v.boolean()),
+      generatedDrafts: v.optional(v.any()),
     }),
   },
   handler: async (ctx, args) => {
+    // Merge with existing draftProgress so partial updates don't wipe other fields
+    const post = await ctx.db.get(args.postId);
+    const existing = post?.draftProgress ?? {};
     await ctx.db.patch(args.postId, {
-      draftProgress: args.draftProgress,
+      draftProgress: { ...existing, ...args.draftProgress },
     });
+  },
+});
+
+export const deletePost = mutation({
+  args: { postId: v.id("posts") },
+  handler: async (ctx, args) => {
+    const post = await ctx.db.get(args.postId);
+    if (!post) throw new Error("Post not found");
+
+    // Cascade delete revisions
+    const revisions = await ctx.db
+      .query("revisions")
+      .withIndex("by_post", (q) => q.eq("postId", args.postId))
+      .collect();
+    for (const rev of revisions) {
+      await ctx.db.delete(rev._id);
+    }
+
+    // Cascade delete review runs and their items
+    const reviewRuns = await ctx.db
+      .query("reviewRuns")
+      .withIndex("by_post", (q) => q.eq("postId", args.postId))
+      .collect();
+    for (const run of reviewRuns) {
+      const items = await ctx.db
+        .query("reviewItems")
+        .withIndex("by_run", (q) => q.eq("runId", run._id))
+        .collect();
+      for (const item of items) {
+        await ctx.db.delete(item._id);
+      }
+      await ctx.db.delete(run._id);
+    }
+
+    // Cascade delete freshness updates
+    const freshnessUpdates = await ctx.db
+      .query("freshnessUpdates")
+      .withIndex("by_post", (q) => q.eq("postId", args.postId))
+      .collect();
+    for (const update of freshnessUpdates) {
+      await ctx.db.delete(update._id);
+    }
+
+    // Cascade delete task progress
+    const taskProgress = await ctx.db
+      .query("taskProgress")
+      .withIndex("by_post_type", (q) => q.eq("postId", args.postId))
+      .collect();
+    for (const tp of taskProgress) {
+      await ctx.db.delete(tp._id);
+    }
+
+    // Delete the post itself
+    await ctx.db.delete(args.postId);
   },
 });
 

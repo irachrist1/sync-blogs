@@ -21,6 +21,31 @@ export const getProgress = query({
   },
 });
 
+// Lightweight mutation called frequently during streaming — only updates streamContent
+export const setStreamContent = mutation({
+  args: {
+    postId: v.id("posts"),
+    taskType: v.union(
+      v.literal("compose"),
+      v.literal("review"),
+      v.literal("freshness")
+    ),
+    streamContent: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("taskProgress")
+      .withIndex("by_post_type", (q) =>
+        q.eq("postId", args.postId).eq("taskType", args.taskType)
+      )
+      .order("desc")
+      .first();
+    if (existing) {
+      await ctx.db.patch(existing._id, { streamContent: args.streamContent });
+    }
+  },
+});
+
 export const upsertProgress = mutation({
   args: {
     postId: v.id("posts"),
@@ -38,6 +63,7 @@ export const upsertProgress = mutation({
     ),
     progress: v.number(),
     message: v.optional(v.string()),
+    streamContent: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
@@ -55,6 +81,7 @@ export const upsertProgress = mutation({
       status: args.status,
       progress: args.progress,
       message: args.message,
+      streamContent: args.streamContent,
       completedAt:
         args.status === "completed" || args.status === "failed"
           ? Date.now()

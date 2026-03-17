@@ -57,6 +57,21 @@ export const saveRevision = mutation({
   },
 });
 
+export const getGeneratedDrafts = query({
+  args: { postId: v.id("posts") },
+  handler: async (ctx, args) => {
+    const revisions = await ctx.db
+      .query("revisions")
+      .withIndex("by_post", (q) => q.eq("postId", args.postId))
+      .order("desc")
+      .collect();
+    // Return the most recent batch of generated drafts (typically 3)
+    const generated = revisions.filter((r) => r.source === "generated");
+    // Take the last 3 (most recent batch)
+    return generated.slice(0, 3);
+  },
+});
+
 export const saveDraftOptions = mutation({
   args: {
     postId: v.id("posts"),

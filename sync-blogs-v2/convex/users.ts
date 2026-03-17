@@ -46,6 +46,23 @@ export const completeOnboarding = mutation({
   },
 });
 
+export const getPreferredModel = query({
+  args: { userId: v.id("users") },
+  handler: async (ctx, args) => {
+    const user = await ctx.db.get(args.userId);
+    return user?.preferredModel ?? null;
+  },
+});
+
+export const updatePreferredModel = mutation({
+  args: { preferredModel: v.string() },
+  handler: async (ctx, args) => {
+    const userId = await getAuthUserId(ctx);
+    if (userId === null) throw new Error("Not authenticated");
+    await ctx.db.patch(userId, { preferredModel: args.preferredModel });
+  },
+});
+
 export const updateWritingProfile = mutation({
   args: {
     writingProfile: v.object({

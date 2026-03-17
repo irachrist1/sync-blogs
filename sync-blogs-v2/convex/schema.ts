@@ -17,6 +17,7 @@ export default defineSchema({
     isAnonymous: v.optional(v.boolean()),
     // Custom fields
     onboardingCompleted: v.optional(v.boolean()),
+    preferredModel: v.optional(v.string()),
     writingProfile: v.optional(
       v.object({
         destination: v.optional(v.array(v.string())),
@@ -50,6 +51,9 @@ export default defineSchema({
         roughInput: v.optional(v.string()),
         clarifyingQuestions: v.optional(v.any()),
         clarifyingAnswers: v.optional(v.any()),
+        draftChosen: v.optional(v.boolean()),
+        // Generated draft options stored here to avoid revision-query bugs
+        generatedDrafts: v.optional(v.any()),
       })
     ),
   })
@@ -155,6 +159,7 @@ export default defineSchema({
     ),
     progress: v.number(),
     message: v.optional(v.string()),
+    streamContent: v.optional(v.string()),
     completedAt: v.optional(v.number()),
   })
     .index("by_post_type", ["postId", "taskType"])

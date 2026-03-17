@@ -21,11 +21,16 @@ export default function PostPage() {
     );
   }
 
-  // If no revision exists yet, show the compose flow
-  if (!postData.latestRevision) {
+  // Show compose flow if:
+  // 1. No revision exists yet, OR
+  // 2. Revisions exist but user hasn't chosen a draft yet (generated drafts don't count)
+  const draftChosen = (postData.draftProgress as { draftChosen?: boolean } | undefined)?.draftChosen;
+  const hasManualRevision = postData.latestRevision?.source === "manual";
+  const showEditor = hasManualRevision || draftChosen || (postData.latestRevision && !postData.draftProgress);
+
+  if (!showEditor) {
     return <ThoughtsInput postId={postId} post={postData} />;
   }
 
-  // Otherwise show the editor
   return <PostEditor postId={postId} post={postData} />;
 }

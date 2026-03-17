@@ -1,38 +1,15 @@
 export const PERSONAS = [
   {
-    id: "editor",
-    name: "The Editor",
-    role: "Clarity & structure",
-    tone: "Direct, precise feedback on writing mechanics",
+    id: "craft",
+    name: "Craft",
+    role: "Structure, clarity & readability",
     color: "#2d6a4f",
   },
   {
-    id: "skeptic",
-    name: "The Skeptic",
-    role: "Logic & evidence",
-    tone: "Challenges claims and asks for proof",
+    id: "truth",
+    name: "Truth",
+    role: "Logic, claims & audience fit",
     color: "#b8860b",
-  },
-  {
-    id: "empath",
-    name: "The Empath",
-    role: "Reader connection",
-    tone: "Focuses on emotional resonance and relatability",
-    color: "#c2556e",
-  },
-  {
-    id: "philosopher",
-    name: "The Philosopher",
-    role: "Depth & meaning",
-    tone: "Explores deeper implications and nuance",
-    color: "#5b5ea6",
-  },
-  {
-    id: "coach",
-    name: "The Coach",
-    role: "Growth & encouragement",
-    tone: "Supportive guidance with actionable next steps",
-    color: "#2e8b57",
   },
 ] as const;
 

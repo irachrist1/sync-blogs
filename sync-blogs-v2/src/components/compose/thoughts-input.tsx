@@ -23,7 +23,6 @@ export function ThoughtsInput({ postId, post }: ThoughtsInputProps) {
   const generateClarify = useAction(api.ai.generateClarifyingQuestions);
   const composeDrafts = useAction(api.ai.composeDrafts);
 
-  // Task progress for real-time status
   const taskProgress = useQuery(api.taskProgress.getProgress, {
     postId,
     taskType: "compose",
@@ -43,9 +42,25 @@ export function ThoughtsInput({ postId, post }: ThoughtsInputProps) {
   const [generateStartTime, setGenerateStartTime] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const initializedRef = useRef(false);
 
-  // Sync from Convex on load
+  // Sync from Convex on load — resume at the right stage
   useEffect(() => {
+    if (initializedRef.current) return;
+    if (draftProgress === undefined) return; // still loading
+
+    const storedDrafts = draftProgress?.generatedDrafts as
+      | Array<{ content: string; titleSuggestion?: string }>
+      | undefined;
+
+    // Resume at draft selection only if drafts are stored and no draft has been chosen yet
+    if (storedDrafts && storedDrafts.length > 0 && !draftProgress?.draftChosen) {
+      setDrafts(storedDrafts);
+      setStage("drafts");
+      initializedRef.current = true;
+      return;
+    }
+
     if (draftProgress) {
       if (!roughInput) setRoughInput(draftProgress.roughInput ?? "");
       if (draftProgress.clarifyingQuestions) {
@@ -60,6 +75,8 @@ export function ThoughtsInput({ postId, post }: ThoughtsInputProps) {
         if (stage === "thoughts") setStage("clarify");
       }
     }
+    initializedRef.current = true;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftProgress]);
 
   // Timer for elapsed seconds during generation
@@ -79,22 +96,18 @@ export function ThoughtsInput({ postId, post }: ThoughtsInputProps) {
     };
   }, [isGenerating]);
 
-  // Auto-save rough input (debounced)
+  // Auto-save rough input (debounced) — merge handles preserving other fields
   const autoSave = useCallback(
     (value: string) => {
       const timeout = setTimeout(() => {
         saveDraftProgress({
           postId,
-          draftProgress: {
-            roughInput: value,
-            clarifyingQuestions: draftProgress?.clarifyingQuestions,
-            clarifyingAnswers: draftProgress?.clarifyingAnswers,
-          },
+          draftProgress: { roughInput: value },
         });
       }, 1000);
       return () => clearTimeout(timeout);
     },
-    [postId, saveDraftProgress, draftProgress]
+    [postId, saveDraftProgress]
   );
 
   useEffect(() => {
@@ -112,6 +125,7 @@ export function ThoughtsInput({ postId, post }: ThoughtsInputProps) {
       const questions = await generateClarify({
         roughInput,
         writingProfile: user.writingProfile,
+        userId: user._id,
       });
 
       const formatted = questions.map((q) => ({
@@ -123,11 +137,7 @@ export function ThoughtsInput({ postId, post }: ThoughtsInputProps) {
 
       await saveDraftProgress({
         postId,
-        draftProgress: {
-          roughInput,
-          clarifyingQuestions: formatted,
-          clarifyingAnswers: {},
-        },
+        draftProgress: { clarifyingQuestions: formatted, clarifyingAnswers: {} },
       });
 
       setStage("clarify");
@@ -148,11 +158,7 @@ export function ThoughtsInput({ postId, post }: ThoughtsInputProps) {
       if (answers) {
         await saveDraftProgress({
           postId,
-          draftProgress: {
-            roughInput,
-            clarifyingQuestions: clarifyData?.questions,
-            clarifyingAnswers: answers,
-          },
+          draftProgress: { clarifyingAnswers: answers },
         });
       }
 
@@ -188,13 +194,11 @@ export function ThoughtsInput({ postId, post }: ThoughtsInputProps) {
       setStage("drafts");
     } catch (err) {
       console.error("Failed to generate drafts:", err);
-      // Stay on clarify so user can retry
     } finally {
       setIsGenerating(false);
     }
   };
 
-  // Get button label based on progress
   const getGenerateLabel = () => {
     if (!isGenerating) return "Generate with these answers";
     const msg = taskProgress?.message;
@@ -231,7 +235,14 @@ export function ThoughtsInput({ postId, post }: ThoughtsInputProps) {
       <DraftOptions
         postId={postId}
         drafts={drafts}
-        onBack={() => setStage("clarify")}
+        onBack={async () => {
+          // Clear stored drafts so resume won't jump back here after navigation
+          await saveDraftProgress({
+            postId,
+            draftProgress: { generatedDrafts: [] },
+          });
+          setStage("clarify");
+        }}
       />
     );
   }

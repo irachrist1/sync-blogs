@@ -5,39 +5,31 @@ import { api } from "../../../../convex/_generated/api";
 import { useCurrentUser } from "@/hooks/use-current-user";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useRouter } from "next/navigation";
+
+const MODEL_OPTIONS = [
+  { value: "claude-sonnet-4-6", label: "Claude Sonnet 4.6", desc: "Fast · Recommended" },
+  { value: "claude-opus-4-6", label: "Claude Opus 4.6", desc: "Most capable · Slower" },
+  { value: "claude-haiku-4-5-20251001", label: "Claude Haiku 4.5", desc: "Fastest · Cheapest" },
+];
 
 export default function SettingsPage() {
   const { user } = useCurrentUser();
   const router = useRouter();
 
-  const settings = useQuery(
-    api.settings.getSettings,
-    user ? { userId: user._id } : "skip"
-  );
+  const updatePreferredModel = useMutation(api.users.updatePreferredModel);
 
-  const updateWatchlist = useMutation(api.settings.updateWatchlist);
-
-  const [watchlistText, setWatchlistText] = useState("");
+  const [modelSaved, setModelSaved] = useState(false);
 
   const profile = user?.writingProfile;
+  const currentModel = user?.preferredModel ?? "claude-sonnet-4-6";
 
-  const handleSaveWatchlist = () => {
-    if (!user) return;
-    try {
-      const parsed = JSON.parse(watchlistText);
-      updateWatchlist({ userId: user._id, versionWatchlist: parsed });
-    } catch {
-      const entries: Record<string, string> = {};
-      watchlistText.split("\n").forEach((line) => {
-        const [name, version] = line.split(":").map((s) => s.trim());
-        if (name && version) entries[name] = version;
-      });
-      updateWatchlist({ userId: user._id, versionWatchlist: entries });
-    }
+  const handleModelChange = async (model: string) => {
+    await updatePreferredModel({ preferredModel: model });
+    setModelSaved(true);
+    setTimeout(() => setModelSaved(false), 2000);
   };
 
   if (!user) return null;
@@ -90,22 +82,38 @@ export default function SettingsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Version Watchlist</CardTitle>
+            <CardTitle className="text-base">AI Model</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-app mb-3">
-              Track technology versions to detect stale references in your posts.
-              One per line: &quot;name: version&quot;
+            <p className="text-sm text-muted-app mb-4">
+              Choose which Claude model powers your drafts and reviews.
             </p>
-            <Textarea
-              value={watchlistText}
-              onChange={(e) => setWatchlistText(e.target.value)}
-              placeholder={"react: 19\nnext: 15\ntailwind: 4"}
-              className="min-h-[120px] mb-3"
-            />
-            <Button size="sm" onClick={handleSaveWatchlist}>
-              Save watchlist
-            </Button>
+            <div className="space-y-2">
+              {MODEL_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => handleModelChange(opt.value)}
+                  className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
+                    currentModel === opt.value
+                      ? "border-[var(--color-accent-app)] bg-[var(--color-accent-soft)]"
+                      : "border-[var(--color-line)] hover:border-[var(--color-accent-muted)] bg-white"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className={`text-sm font-medium ${currentModel === opt.value ? "text-[var(--color-accent-app)]" : "text-[var(--color-ink)]"}`}>
+                      {opt.label}
+                    </span>
+                    {currentModel === opt.value && (
+                      <span className="text-xs font-semibold text-[var(--color-accent-app)]">Selected</span>
+                    )}
+                  </div>
+                  <span className="text-xs text-[var(--color-muted-app)]">{opt.desc}</span>
+                </button>
+              ))}
+            </div>
+            {modelSaved && (
+              <p className="text-xs text-[var(--color-accent-app)] mt-3">Saved.</p>
+            )}
           </CardContent>
         </Card>
 

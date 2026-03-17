@@ -4,12 +4,22 @@ import { v } from "convex/values";
 import { action } from "./_generated/server";
 import { api } from "./_generated/api";
 import Anthropic from "@anthropic-ai/sdk";
+import { Id } from "./_generated/dataModel";
 
 function getClient(): Anthropic {
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 }
 
-function getModel(): string {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function getModelForUser(ctx: any, userId?: Id<"users">): Promise<string> {
+  if (userId) {
+    try {
+      const preferred = await ctx.runQuery(api.users.getPreferredModel, { userId }) as string | null;
+      if (preferred) return preferred;
+    } catch {
+      // fall through to default
+    }
+  }
   return process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6";
 }
 
@@ -24,31 +34,25 @@ function readText(message: Anthropic.Message): string {
 function parseJson<T>(text: string): T {
   // Strip markdown code fences if present
   let cleaned = text.trim();
-  // Remove opening ```json or ```
   cleaned = cleaned.replace(/^```(?:json)?\s*\n?/, "");
-  // Remove closing ```
   cleaned = cleaned.replace(/\n?\s*```\s*$/, "");
   cleaned = cleaned.trim();
 
   try {
     return JSON.parse(cleaned);
   } catch (e) {
-    // Try to extract JSON object/array from mixed content
     const jsonMatch = cleaned.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
     if (jsonMatch) {
       try {
         return JSON.parse(jsonMatch[1]);
       } catch {
-        // Try to fix truncated JSON by closing open braces/brackets
         let attempt = jsonMatch[1];
         const opens = (attempt.match(/\{/g) || []).length;
         const closes = (attempt.match(/\}/g) || []).length;
         const openBrackets = (attempt.match(/\[/g) || []).length;
         const closeBrackets = (attempt.match(/\]/g) || []).length;
 
-        // Remove trailing incomplete string (unterminated)
         attempt = attempt.replace(/,\s*"[^"]*$/, "");
-        // Close any open strings
         if ((attempt.match(/"/g) || []).length % 2 !== 0) {
           attempt += '"';
         }
@@ -65,17 +69,19 @@ function parseJson<T>(text: string): T {
   }
 }
 
+
 export const generateClarifyingQuestions = action({
   args: {
     roughInput: v.string(),
     writingProfile: v.optional(v.any()),
+    userId: v.optional(v.id("users")),
   },
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args) => {
     console.log("[clarify] Starting clarifying questions generation");
     console.log("[clarify] Input length:", args.roughInput.length, "chars");
     console.log("[clarify] Has writing profile:", !!args.writingProfile);
     const client = getClient();
-    const model = getModel();
+    const model = await getModelForUser(ctx, args.userId);
 
     const profileContext =
       args.writingProfile && Object.keys(args.writingProfile).length > 0
@@ -148,9 +154,8 @@ export const composeDrafts = action({
     console.log("[compose] Has clarifying answers:", !!args.clarifyingAnswers);
 
     const client = getClient();
-    const model = getModel();
+    const model = await getModelForUser(ctx, args.userId);
 
-    // Update progress
     await ctx.runMutation(api.taskProgress.upsertProgress, {
       postId: args.postId,
       userId: args.userId,
@@ -173,7 +178,7 @@ export const composeDrafts = action({
         "- Write in the user's voice, not a generic AI voice"
       );
       profileLines.push(
-        "- Follow their formatting habits (em-dashes, capitalization style, sentence case headers, etc.)"
+        "- Follow their formatting habits, capitalization style, and sentence case headers"
       );
       profileLines.push(
         "- Match their preferred sentence style and structure"
@@ -185,6 +190,18 @@ export const composeDrafts = action({
       profileLines.push(
         "- Target their preferred article length unless the clarifying answers suggest otherwise"
       );
+      // Explicitly honour formattingAvoid — e.g. if the writer chose "em-dashes" during onboarding
+      const avoid = args.writingProfile?.formattingAvoid;
+      if (Array.isArray(avoid) && avoid.length > 0) {
+        profileLines.push(
+          `- The writer explicitly avoids these styles: ${avoid.join(", ")}. NEVER use them.`
+        );
+        if (avoid.includes("em-dashes")) {
+          profileLines.push(
+            "- NEVER use em-dashes (—) under any circumstances. Use commas, colons, or rewrite the sentence instead."
+          );
+        }
+      }
     }
 
     const clarifyLines: string[] = [];
@@ -222,7 +239,7 @@ export const composeDrafts = action({
       "Do NOT start sentences with 'Delve' or 'In today's world'.",
       "Do NOT over-explain. Trust the reader.",
       "If the writer writes opinionated content, take a stance — don't hedge.",
-      "Use markdown formatting: headers with ##, bold for key terms, em-dashes where appropriate based on profile.",
+      "Use markdown formatting: headers with ##, bold for key terms. Do not use em-dashes (—).",
       "Avoid generic AI tone, filler, corporate cadence.",
       "Preserve specificity and natural phrasing.",
       args.mode
@@ -243,7 +260,6 @@ export const composeDrafts = action({
       message: "AI is writing drafts...",
     });
 
-    // Use continuation to handle long responses that get truncated
     let messages: Anthropic.MessageParam[] = [
       { role: "user", content: prompt },
     ];
@@ -270,7 +286,6 @@ export const composeDrafts = action({
 
       if (response.stop_reason === "end_turn") break;
 
-      // If truncated, ask the model to continue
       console.log(`[compose] Response truncated (${response.stop_reason}), requesting continuation...`);
       messages = [
         ...messages,
@@ -303,7 +318,6 @@ export const composeDrafts = action({
       message: "Saving drafts...",
     });
 
-    // Save drafts as revisions
     const drafts = parsed.options.map((opt) => ({
       content: opt.draft,
       titleSuggestion: opt.titleSuggestion,
@@ -313,6 +327,14 @@ export const composeDrafts = action({
       postId: args.postId,
       userId: args.userId,
       drafts,
+    });
+
+    // Store draft array in draftProgress so the UI reads from here
+    // (avoids revision-query race where getGeneratedDrafts returns wrong results
+    // after the user selects a draft and a new generated revision is created)
+    await ctx.runMutation(api.posts.saveDraftProgress, {
+      postId: args.postId,
+      draftProgress: { generatedDrafts: drafts },
     });
 
     await ctx.runMutation(api.taskProgress.upsertProgress, {
@@ -347,7 +369,7 @@ export const runReview = action({
     console.log("[review] Content length:", args.content.length, "chars");
 
     const client = getClient();
-    const model = getModel();
+    const model = await getModelForUser(ctx, args.userId);
 
     await ctx.runMutation(api.taskProgress.upsertProgress, {
       postId: args.postId,
@@ -360,38 +382,18 @@ export const runReview = action({
 
     const personas = [
       {
-        name: "Editor",
-        role: "Improve structure, clarity, rhythm, and readability without flattening the author's voice.",
-        tone: "Calm, exact, editorial.",
+        name: "Craft",
+        id: "craft",
+        role: "Review structure, clarity, rhythm, readability, and tone. Catch awkward phrasing, weak openings, redundancy, and pacing issues.",
       },
       {
-        name: "Skeptic",
-        role: "Stress-test assumptions, factual claims, and weak logic.",
-        tone: "Respectful, sharp, evidence-first.",
-      },
-      {
-        name: "Empath",
-        role: "Assess emotional nuance, vulnerability, and whether the writing lands as intended.",
-        tone: "Warm, observant, non-judgmental.",
-      },
-      {
-        name: "Philosopher",
-        role: "Look for deeper meaning, stronger thesis, and conceptual coherence.",
-        tone: "Curious, reflective, spacious.",
-      },
-      {
-        name: "Coach",
-        role: "Help the writer move forward with concrete next steps and preserve momentum.",
-        tone: "Encouraging, practical, direct.",
+        name: "Truth",
+        id: "truth",
+        role: "Stress-test claims, logic, and audience fit. Flag unsupported assertions, logical gaps, and anything that might confuse or lose the reader.",
       },
     ];
 
-    const intensityLine =
-      args.intensity === "gentle"
-        ? "Keep feedback light and limited to the most important improvements."
-        : args.intensity === "rigorous"
-          ? "Be thorough and demanding, but still supportive and concrete."
-          : "Balance encouragement with direct, high-signal critique.";
+    const maxItems = args.intensity === "gentle" ? 3 : args.intensity === "rigorous" ? 6 : 4;
 
     const allItems: Array<{
       persona: string;
@@ -402,24 +404,35 @@ export const runReview = action({
       confidence: number;
     }> = [];
 
-    // Run all personas in parallel
     const results = await Promise.all(
       personas.map(async (persona, idx) => {
         console.log(`[review] Running persona: ${persona.name}`);
         const response = await client.messages.create({
           model,
-          max_tokens: 4000,
-          temperature: 0.5,
+          max_tokens: 2000,
+          temperature: 0.4,
           system: [
-            `You are the ${persona.name} persona in a private writing app.`,
-            `Role: ${persona.role}`,
-            `Tone: ${persona.tone}`,
-            intensityLine,
+            `You are a writing reviewer called "${persona.name}" in a private blogging app.`,
+            `Your focus: ${persona.role}`,
+            "",
+            "IMPORTANT TONE RULES:",
+            "- Write like a smart friend giving feedback over coffee, NOT like an AI.",
+            '- Use first person: "I noticed...", "I think...", "How about..."',
+            "- Be specific — quote the exact words or section you're referring to.",
+            "- Keep each issue to 1-2 sentences. No filler, no flattery, no hedging.",
+            "- Don't repeat yourself. Each item must be a distinct, actionable point.",
+            `- Return at most ${maxItems} items. Only the most impactful ones.`,
+            "- If the writing is good, return fewer items. Don't invent problems.",
+            "",
             "Return strict JSON only.",
-            "Required JSON shape:",
-            '{"persona":"string","strengths":["string"],"issues":[{"priority":"now|soon|optional","issue":"string","suggestion":"string","evidence":"string","confidence":0.0}],"questions":["string"]}',
-            "Prioritize helpful, non-shaming feedback.",
-            "If you make a factual challenge, mention the evidence directly in `evidence`.",
+            "Required shape:",
+            `{"persona":"${persona.id}","items":[{"priority":"now|soon|optional","issue":"string","suggestion":"string","evidence":"optional quoted text from the draft","confidence":0.0-1.0}]}`,
+            "",
+            "Examples of good issue/suggestion pairs:",
+            '- issue: "Your opening feels generic — \\"In today\'s world\\" doesn\'t hook anyone."',
+            '  suggestion: "Try leading with your strongest claim or a surprising stat."',
+            '- issue: "I noticed you mention \\"studies show\\" twice without citing anything specific."',
+            '  suggestion: "Either name the study or drop the appeal to authority — your argument is strong enough without it."',
           ].join("\n"),
           messages: [
             {
@@ -438,25 +451,27 @@ export const runReview = action({
           message: `${persona.name} reviewed...`,
         });
 
+        const rawText = readText(response);
+        console.log(`[review] ${persona.name} done: ${rawText.length} chars, usage: input=${response.usage.input_tokens} output=${response.usage.output_tokens}`);
+
         return parseJson<{
           persona: string;
-          strengths: string[];
-          issues: Array<{
+          items: Array<{
             priority: string;
             issue: string;
             suggestion: string;
             evidence?: string;
             confidence: number;
           }>;
-          questions: string[];
-        }>(readText(response));
+        }>(rawText);
       })
     );
 
-    // Flatten items
+    console.log("[review] All personas complete");
+
     for (const result of results) {
-      const personaId = result.persona.toLowerCase();
-      for (const issue of result.issues || []) {
+      const personaId = result.persona || "craft";
+      for (const issue of result.items || []) {
         const priority = ["now", "soon", "optional"].includes(issue.priority)
           ? (issue.priority as "now" | "soon" | "optional")
           : "soon";
@@ -474,10 +489,7 @@ export const runReview = action({
       }
     }
 
-    // Build summary
-    const summary = results
-      .map((r) => `${r.persona}: ${r.strengths?.[0] || "No specific strength noted"}`)
-      .join("; ");
+    const summary = `${allItems.length} suggestion${allItems.length === 1 ? "" : "s"} from review`;
 
     await ctx.runMutation(api.reviews.saveReviewResults, {
       runId: args.runId,
@@ -495,7 +507,111 @@ export const runReview = action({
       message: "Review complete!",
     });
 
+    console.log("[review] Complete:", allItems.length, "issues found");
     return { summary, itemCount: allItems.length };
+  },
+});
+
+export const applyReviewFix = action({
+  args: {
+    postId: v.id("posts"),
+    userId: v.id("users"),
+    itemId: v.id("reviewItems"),
+    content: v.string(),
+    issue: v.string(),
+    suggestion: v.string(),
+  },
+  handler: async (ctx, args) => {
+    console.log("[apply-fix] Applying review fix for item:", args.itemId);
+    const client = getClient();
+    const model = await getModelForUser(ctx, args.userId);
+
+    // Initialise progress so the frontend can subscribe to stream updates
+    await ctx.runMutation(api.taskProgress.upsertProgress, {
+      postId: args.postId,
+      userId: args.userId,
+      taskType: "review",
+      status: "running",
+      progress: 10,
+      message: "Applying fix…",
+      streamContent: "",
+    });
+
+    let accumulated = "";
+    let lastFlush = Date.now();
+
+    // Stream the response so the editor can show text appearing in real-time
+    const stream = await client.messages.stream({
+      model,
+      max_tokens: 8000,
+      temperature: 0.3,
+      system: [
+        "You apply a specific editorial fix to an article.",
+        "You receive the full article, an identified issue, and the suggested fix.",
+        "Apply ONLY that specific change. Do not rewrite, restructure, or alter anything else.",
+        "Preserve the author's voice, formatting, and all other content exactly as-is.",
+        "Return the complete modified article text and nothing else — no preamble, no commentary.",
+      ].join("\n"),
+      messages: [
+        {
+          role: "user",
+          content: `Article:\n${args.content}\n\n---\nIssue to fix: ${args.issue}\nSuggested fix: ${args.suggestion}\n\nReturn the full modified article.`,
+        },
+      ],
+    });
+
+    for await (const event of stream) {
+      if (
+        event.type === "content_block_delta" &&
+        event.delta.type === "text_delta"
+      ) {
+        accumulated += event.delta.text;
+        const now = Date.now();
+        // Flush to DB roughly every 150ms so the UI streams smoothly
+        if (now - lastFlush > 150) {
+          await ctx.runMutation(api.taskProgress.setStreamContent, {
+            postId: args.postId,
+            taskType: "review",
+            streamContent: accumulated,
+          });
+          lastFlush = now;
+        }
+      }
+    }
+
+    const newContent = accumulated.trim();
+    console.log("[apply-fix] Streamed", newContent.length, "chars");
+
+    // Final flush so the UI always gets the complete content
+    await ctx.runMutation(api.taskProgress.setStreamContent, {
+      postId: args.postId,
+      taskType: "review",
+      streamContent: newContent,
+    });
+
+    await ctx.runMutation(api.revisions.saveRevision, {
+      postId: args.postId,
+      userId: args.userId,
+      content: newContent,
+      source: "generated",
+    });
+
+    await ctx.runMutation(api.reviews.applyReviewDecision, {
+      itemId: args.itemId,
+      actionStatus: "accepted",
+    });
+
+    await ctx.runMutation(api.taskProgress.upsertProgress, {
+      postId: args.postId,
+      userId: args.userId,
+      taskType: "review",
+      status: "completed",
+      progress: 100,
+      message: "Fix applied",
+      streamContent: "",
+    });
+
+    return newContent;
   },
 });
 
@@ -508,8 +624,11 @@ export const scanFreshness = action({
     publishedAt: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    console.log("[freshness] Starting scan for post:", args.postId);
+    console.log("[freshness] Content length:", args.content.length, "chars");
+
     const client = getClient();
-    const model = getModel();
+    const model = await getModelForUser(ctx, args.userId);
 
     await ctx.runMutation(api.taskProgress.upsertProgress, {
       postId: args.postId,
@@ -520,18 +639,27 @@ export const scanFreshness = action({
       message: "Scanning for outdated content...",
     });
 
+    const systemPrompt = [
+      "You audit published writing for stale claims and context drift.",
+      "Use the web_search tool to verify specific version numbers or facts before claiming they are outdated. Do not guess.",
+      "After researching, return strict JSON only.",
+      "Required shape:",
+      '{"suggestions":[{"summary":"string","severity":"low|medium|high","confidence":0.0,"suggestedAction":"notice|addendum|revision","sourceLinks":["https://..."]}]}',
+      "Only include suggestions when there is a meaningful chance the published content is now outdated.",
+      'If nothing appears outdated, return {"suggestions":[]}.',
+    ].join("\n");
+
+    // Anthropic's built-in web search tool — no external API key needed.
+    // The API executes searches server-side and returns results inline.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const webSearchTool: any = { type: "web_search_20250305", name: "web_search" };
+
     const response = await client.messages.create({
       model,
-      max_tokens: 1800,
+      max_tokens: 4000,
       temperature: 0.2,
-      system: [
-        "You audit published writing for stale claims and context drift.",
-        "Return strict JSON only.",
-        "Required shape:",
-        '{"suggestions":[{"summary":"string","severity":"low|medium|high","confidence":0.0,"suggestedAction":"notice|addendum|revision","sourceLinks":["https://..."]}]}',
-        "Only include suggestions when there is a meaningful chance the published content is now outdated.",
-        'If nothing appears outdated, return {"suggestions":[]}.',
-      ].join("\n"),
+      system: systemPrompt,
+      tools: [webSearchTool],
       messages: [
         {
           role: "user",
@@ -539,6 +667,9 @@ export const scanFreshness = action({
         },
       ],
     });
+
+    console.log("[freshness] Response stop_reason:", response.stop_reason);
+    const finalText = readText(response);
 
     const parsed = parseJson<{
       suggestions: Array<{
@@ -548,7 +679,7 @@ export const scanFreshness = action({
         suggestedAction: "notice" | "addendum" | "revision";
         sourceLinks: string[];
       }>;
-    }>(readText(response));
+    }>(finalText || '{"suggestions":[]}');
 
     if (parsed.suggestions.length > 0) {
       await ctx.runMutation(api.freshness.saveFreshnessResults, {
@@ -570,6 +701,7 @@ export const scanFreshness = action({
           : "Content looks fresh!",
     });
 
+    console.log("[freshness] Found", parsed.suggestions.length, "suggestions");
     return parsed.suggestions;
   },
 });

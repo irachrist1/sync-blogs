@@ -29,12 +29,13 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   );
 
   const createPost = useMutation(api.posts.createPost);
+  const deletePost = useMutation(api.posts.deletePost);
 
   const handleNewPost = async () => {
     if (!user) return;
     const postId = await createPost({
       userId: user._id,
-      title: "Untitled",
+      title: "",
     });
     router.push(`/app/${postId}`);
     onNavigate?.();
@@ -43,6 +44,16 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const handleSignOut = async () => {
     await signOut();
     router.push("/");
+  };
+
+  const handleDeletePost = async (e: React.MouseEvent, postId: string) => {
+    e.stopPropagation();
+    if (!confirm("Delete this post? This cannot be undone.")) return;
+    await deletePost({ postId: postId as Parameters<typeof deletePost>[0]["postId"] });
+    // Navigate away if the deleted post was selected
+    if (selectedPostId === postId) {
+      router.push("/app");
+    }
   };
 
   return (
@@ -96,6 +107,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             post={post}
             isSelected={selectedPostId === post._id}
             onClick={() => { router.push(`/app/${post._id}`); onNavigate?.(); }}
+            onDelete={(e) => handleDeletePost(e, post._id)}
           />
         ))}
         {posts?.length === 0 && (
