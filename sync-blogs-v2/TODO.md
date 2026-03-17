@@ -1,196 +1,390 @@
-# Sync Blogs v2 — Open Tasks
+# Sync Blogs v2 — Status, Bugs & Work Needed
 
-Each task below is scoped for a single Claude Code session. They can be worked independently and in parallel.
-
----
-
-## Task 1: Add Markdown Rendering + Fix Em-Dash Prompts
-
-**Problem**: The editor outputs raw markdown (## headers, **bold**, etc.) but there's no markdown renderer — the user sees literal `##` and `**` in the UI. The AI compose prompt at `convex/ai.ts:225` explicitly tells the model to "Use markdown formatting: headers with ##, bold for key terms, em-dashes where appropriate." This produces unrendered markup in the plain textarea editor.
-
-**What to fix**:
-1. Install `react-markdown` (or similar lightweight renderer) as a dependency. Preferably something much faster and performant while looking beauitful 
-2. In the **editor** (`src/components/editor/post-editor.tsx`), add a preview/render mode so the user can toggle between raw editing and rendered markdown. Or better: use a proper markdown-aware editor like `@uiw/react-md-editor` or a minimal custom solution that renders inline markdown while editing. The user should feel like he's using a word document without the need for using word.
-3. In the **draft options cards** (`src/components/compose/draft-options.tsx`), the preview text (`draft.content.slice(0, 250)`) should render markdown, not show raw `##` and `**`.
-4. In the **review page** (`src/app/app/[postId]/review/page.tsx`), the `item.issue` and `item.suggestion` fields may contain markdown — render them properly.
-5. In `convex/ai.ts` line 225, keep the markdown instruction but remove the em-dash instruction: change `"Use markdown formatting: headers with ##, bold for key terms, em-dashes where appropriate based on profile."` to `"Use markdown formatting: headers with ##, bold for key terms. Do not use em-dashes (—) unless the writer's profile explicitly mentions them."` 
-6. — remove the em-dash reference unless said otherwise by user.
-
-**Files to modify**:
-- `package.json` (add markdown renderer dep)
-- `convex/ai.ts` (fix prompt lines 176, 225)
-- `src/components/editor/post-editor.tsx` (add markdown preview)
-- `src/components/compose/draft-options.tsx` (render preview as markdown)
-- `src/app/app/[postId]/review/page.tsx` (render feedback as markdown)
-
-They could more i'm might be forgeting some of the files check the whole codebase
-
-**Acceptance criteria**: Generated drafts render with proper headings, bold, lists. No raw `##` or `**` visible. No em-dashes in new AI output unless the user's writing profile explicitly requests them. Make sure that the onboarding profile is being used accross the AI propmt and each profile is actually personalized to user. speaking of which i haven't implemented a way for one user profile to not see other user profile which means i might sign in with one account and then that previews to a different user account.
-
-implement proper user profile in db and all. 
+> **For the next dev**: Assume nothing works correctly unless explicitly marked ✅ below.
+> Every section documents what was *attempted*, what actually *works*, and what *needs fixing*.
+> The app builds and deploys, but large parts of the UX are broken or incomplete.
 
 ---
 
-## Task 2: Remove Custom Scrollbar, Keep UI Minimal
+## Live URLs
 
-**Problem**: There's a visible scrollbar/scroll indicator on the left side of the main content area. The user finds it unnecessary and wants a completely clean, minimal look — just the content, no scroll UI chrome.
-
-**What to fix**:
-1. In `src/components/layout/app-shell.tsx` line 42, the main content area has `overflow-y-auto` which shows the browser's default scrollbar.
-2. Hide the scrollbar using CSS while keeping scroll functionality. Add to `src/app/globals.css`:
-   ```css
-   main::-webkit-scrollbar { display: none; }
-   main { -ms-overflow-style: none; scrollbar-width: none; }
-   ```
-3. Also check the sidebar (`src/components/layout/sidebar.tsx` line 92) — the post list has `overflow-y-auto` which may show a scrollbar too. Apply the same treatment.
-4. Check any other scrollable containers (editor textarea, review page, settings page) and suppress visible scrollbars.
-
-**Files to modify**:
-- `src/app/globals.css` (add scrollbar-hiding rules)
-
-**Acceptance criteria**: No visible scrollbar anywhere in the app. User can still scroll with trackpad/mouse wheel/touch. Ultra-minimal.
+| Environment | URL |
+|---|---|
+| **Vercel (production)** | https://sync-blogs-v2.vercel.app |
+| **Convex prod backend** | https://majestic-seal-152.convex.cloud |
+| **Convex dev backend** | https://basic-nightingale-994.convex.cloud |
+| **Convex dashboard** | https://dashboard.convex.dev — logs, queries, mutations visible here |
 
 ---
 
-## Task 3: Redesign Draft Option Cards (Linear-Style) + Fix Back Navigation
+## Deployment Setup (READ THIS BEFORE TOUCHING ANYTHING)
 
-**Problem**: The three draft option cards (Argument, Narrative, Brief) at `src/components/compose/draft-options.tsx` look bad. The user can't distinguish between them, the preview text is too short and unreadable, and clicking one loses all context — there's no way to go back and pick a different draft.
+The app has two separate backends that must both be deployed independently.
 
-**What to fix**:
-1. **Redesign the cards** to look like Linear.app issue cards:
-   - Clean white card with subtle left border color (different per mode: green for Argument, blue for Narrative, amber for Brief)
-   - Mode label as a small colored chip/tag at top-left (not the current tiny all-caps text)
-   - Title suggestion prominently displayed as the card heading
-   - Longer preview (400-500 chars), with proper text truncation and a "Read more" expand toggle
-   - Word count shown at bottom-right in muted text
-   - On hover: subtle elevation + left border thickens (Linear-style)
+### 1. Next.js → Vercel
+```bash
+cd sync-blogs-v2
+vercel --prod --yes
+```
 
-2. **Fix the layout**: Currently uses a CSS grid that can make cards uneven sizes. Switch to a vertical stack (one card per row, full width) so each card has room to breathe and show enough preview text. This matches Linear's list view better than a cramped 3-column grid.
+### 2. Convex functions → production
+```bash
+cd sync-blogs-v2
+npx convex deploy --yes
+```
 
-ORRR As a senior UX designer suggest what to do to redesign the UI
+### 3. Convex functions → dev (local development)
+```bash
+# In one terminal, keep running:
+npx convex dev
 
-3. **Fix back navigation**: After selecting a draft and entering the editor, the user currently cannot go back to see the other two drafts. Fix this:
-   - In the editor (`src/components/editor/post-editor.tsx`), add a "Switch draft" or "Back to options" link that sets `draftChosen` back to false and navigates to the compose view.
-   - In `src/app/app/[postId]/page.tsx`, the logic already supports this — when `draftChosen` is false, it shows ThoughtsInput which will show DraftOptions if generated drafts exist.
-   - Store all 3 drafts so the user can compare. Currently `saveDraftOptions` in `convex/revisions.ts` saves all 3 as revisions, and `getGeneratedDrafts` retrieves them, so this should work.
+# In another terminal:
+npm run dev
+```
 
-4. **Add a selected state**: When the user hovers or clicks a draft card, show a clear visual selection (checkmark, highlighted border) before navigating away, so they feel in control.
+### Why you need both Convex deploys
+- Local `npm run dev` talks to the **dev** Convex deployment (`basic-nightingale-994`)
+- Vercel production talks to the **prod** Convex deployment (`majestic-seal-152`)
+- These are two separate function+schema deployments — a change pushed to prod does NOT
+  update dev and vice versa
+- **Root cause of most "validator error" bugs**: code changes to `convex/` are not
+  deployed to the deployment the running app is pointing at
+- After any change to `convex/` files, run BOTH `npx convex dev --once` (dev) AND
+  `npx convex deploy --yes` (prod), then redeploy Vercel
 
-**Files to modify**:
-- `src/components/compose/draft-options.tsx` (complete redesign)
-- `src/app/globals.css` (new card styles)
-- `src/components/editor/post-editor.tsx` (add "Switch draft" link)
-
-**Acceptance criteria**: Cards look polished and distinct like Linear issues. User can read enough of each draft to decide. User can go back to pick a different draft from the editor. Clean transitions, no jarring navigation.
-
----
-
-## Task 4: Redesign Settings Page — Remove Version Watchlist, Add Model Selector
-
-**Problem**: The settings page (`src/app/app/settings/page.tsx`) has a "Version Watchlist" card that the user finds useless and UI-cluttering — version tracking should happen automatically in the background. Additionally, the default AI model is hardcoded to `claude-sonnet-4-6` in `convex/ai.ts:13` via `process.env.ANTHROPIC_MODEL`, and there's no way for the user to change it from the UI.
-
-**What to fix**:
-1. **Remove the Version Watchlist card** entirely from the settings page. The watchlist concept can stay in the backend for future use, but remove it from the UI.
-
-2. **Add a Model Selector** to the settings page:
-   - Add a `preferredModel` field to the `users` table in `convex/schema.ts` (string, optional).
-   - Create a dropdown/select in the settings page with these options:
-     - `claude-sonnet-4-6` (Fast, recommended) — default
-     - `claude-opus-4-6` (Most capable, slower)
-     - `claude-haiku-4-5-20251001` (Fastest, cheapest)
-   - Save the selection to the user's record via a new mutation.
-   - In `convex/ai.ts`, change `getModel()` to accept a userId parameter and read the user's preferred model from the database, falling back to `process.env.ANTHROPIC_MODEL` or `claude-sonnet-4-6`.
-   - All AI actions (`generateClarifyingQuestions`, `composeDrafts`, `runReview`, `scanFreshness`) already call `getModel()` — update them to pass the userId so the right model is used.
-
-3. **Clean up the settings UI**: Keep the Writing Profile card and Runtime Status card. Remove the Version Watchlist card. Add the new Model card. Style consistently with the rest of the app (use the v1 CSS classes, not raw shadcn Cards).
-
-**Files to modify**:
-- `convex/schema.ts` (add `preferredModel` to users table)
-- `convex/users.ts` (add mutation to update preferred model)
-- `convex/ai.ts` (update `getModel()` to read from user record)
-- `src/app/app/settings/page.tsx` (remove watchlist, add model selector)
-
-**Acceptance criteria**: No version watchlist visible. User can select their preferred AI model from settings. AI calls use the selected model. Clean, minimal settings page.
+### Environment variables
+- `.env.local` → dev Convex URL (`basic-nightingale-994`)
+- Vercel env → prod Convex URL (`majestic-seal-152`) — set via Vercel dashboard
+- `ANTHROPIC_API_KEY` must be set in Convex env vars (not .env.local):
+  ```bash
+  npx convex env set ANTHROPIC_API_KEY sk-ant-...
+  ```
+  Verify it's set: `npx convex env list`
 
 ---
 
-## Task 5: Make Review Feedback Actually Apply Changes to the Article
+## Tech Stack
 
-**Problem**: When the user clicks "Got it" on a review feedback item, it just marks the item as accepted in the database — it doesn't actually apply the suggested change to the article. The user expects "Got it" to mean "yes, apply this fix." When all items are resolved and "Done reviewing" is clicked, there's no indication that anything was applied. The review page is also a separate route (`/app/[postId]/review`) which breaks context — the user loses sight of their article.
-
-**What to fix**:
-1. **Make "Got it" apply the suggestion**: When the user clicks "Got it" on a review item:
-   - Call an AI action that takes the current article content + the issue + the suggestion, and returns the modified content with that specific fix applied.
-   - Save the result as a new revision.
-   - Show a visual diff or highlight of what changed (even a simple "Applied" with a green checkmark is better than nothing).
-
-2. **Add inline comments instead of a separate page** (this is the bigger UX rethink from point #8):
-   - Instead of navigating to `/app/[postId]/review`, show review feedback as **inline margin comments** alongside the editor content — like Google Docs comments or GitHub PR review comments.
-   - Each comment appears next to the relevant section of text (use the `evidence` field to match location).
-   - User can "Got it" (apply) or "Skip" (dismiss) each comment inline without leaving the editor.
-   - This eliminates the separate review page entirely and keeps the user in their writing flow.
-
-   **If the inline approach is too complex for one session**, do this simpler version instead:
-   - Keep the review as a **slide-in panel** on the right side of the editor (like a chat sidebar), not a separate page.
-   - Editor stays visible on the left, review comments on the right.
-   - "Got it" applies the change and the user sees their article update in real-time on the left.
-
-3. **After all items are resolved**: Show a brief "All feedback addressed" message with a count of changes applied vs skipped. Then auto-close the panel/return to clean editor view.
-
-**Files to modify**:
-- `convex/ai.ts` (add `applyReviewFix` action that rewrites a section based on feedback)
-- `convex/reviews.ts` (update `applyReviewDecision` to optionally save new content)
-- `src/components/editor/post-editor.tsx` (add review panel or inline comments)
-- `src/app/app/[postId]/review/page.tsx` (may be removed or converted to panel component)
-- `src/app/globals.css` (styles for inline comments or side panel)
-
-**Acceptance criteria**: "Got it" actually modifies the article. User can see what changed. Review feedback appears alongside the editor (panel or inline), not on a separate page. When done, user is back in the clean editor with all fixes applied.
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 App Router, React 19 |
+| Backend | Convex (real-time DB + serverless functions) |
+| Auth | `@convex-dev/auth` (email/password + magic link) |
+| AI | Anthropic SDK (`@anthropic-ai/sdk`) — `claude-sonnet-4-6` default |
+| Styling | Tailwind + custom CSS vars in `globals.css` |
+| Markdown | `react-markdown` + `remark-gfm` |
 
 ---
 
-## Task 6: Add Web Search to Freshness Scan (Grounding with Real Data)
+## Feature Status
 
-**Problem**: The freshness scan (`convex/ai.ts:scanFreshness`) asks the AI to detect outdated content, but the AI has no access to the internet — it's guessing based on training data. The user noticed it's flagging versions as outdated incorrectly because it can't verify current versions.
+### ✅ Auth (working)
+Sign in / sign up works. Session persists. Middleware protects `/app` routes.
+One known issue: no user isolation on DB queries by default — see "Security" section below.
 
-**What to fix**:
-1. **Add web search capability** to the freshness scan action using the Anthropic tool_use API:
-   - Use Anthropic's built-in web search tool (if available in the SDK version), or integrate a search API (e.g., Tavily, Brave Search, or SerpAPI) as a tool the AI can call.
-   - Before making claims about outdated versions, the AI should search for the current version of the technology mentioned.
-   - The scan prompt should instruct the AI: "Use the search tool to verify current versions before claiming something is outdated. Do not guess."
+### ✅ Sidebar + post list (working)
+Lists posts, filters by status, creates new post, delete with confirmation dialog (hover
+trash icon). Delete cascades to revisions, review runs, review items, freshness updates,
+task progress records.
 
-2. **Implementation approach**:
-   - Add a `SEARCH_API_KEY` environment variable to Convex (via `npx convex env set`).
-   - In `scanFreshness`, define a tool schema for web search and use Anthropic's tool_use flow:
-     ```typescript
-     tools: [{
-       name: "web_search",
-       description: "Search the web for current information",
-       input_schema: { type: "object", properties: { query: { type: "string" } }, required: ["query"] }
-     }]
-     ```
-   - When the AI returns a `tool_use` block, execute the search, feed results back, and let the AI continue.
-   - This gives the freshness scan grounded, real-time data instead of hallucinated version numbers.
+### ⚠️ Compose flow (partially working — flaky)
+The compose flow has 3 stages: thoughts → clarify → drafts.
 
-3. **Fallback**: If no search API key is configured, the scan should still work but include a disclaimer: "Note: These suggestions are based on AI knowledge and may not reflect the latest versions. Configure web search in settings for real-time verification."
+**What works:**
+- Rough input auto-saves to DB (debounced 1s)
+- Textarea auto-expands as user types
+- Clarifying questions generate via AI (Anthropic API call)
+- 3 draft options generate (Argument / Narrative / Brief)
+- Draft selection navigates to editor
 
-**Files to modify**:
-- `convex/ai.ts` (`scanFreshness` action — add tool_use flow)
-- `.env.local` or Convex env vars (add search API key)
+**Known bugs:**
+1. **Draft cards all show same 316-word content** — Intermittent. Root cause: legacy posts
+   that generated drafts before the `generatedDrafts` field was added to `draftProgress`
+   fall back to `getGeneratedDrafts` (revisions query). After selecting a draft, a 4th
+   generated revision is created; the query's `slice(0,3)` then returns 2 originals + 1
+   duplicate. Fix: ensure `generatedDrafts` is populated in `draftProgress` for all posts
+   (migration needed for legacy posts).
 
-**Acceptance criteria**: Freshness scan verifies claims against live web data when a search API is configured. No more false positives about outdated versions. Graceful fallback when search is unavailable.
+2. **"Back to questions" loop** — Clicking back from draft selection should go to clarify
+   stage. It clears `generatedDrafts: []` to prevent resume. For legacy posts using the
+   revisions fallback, clearing `generatedDrafts` won't help because the fallback still
+   finds revisions. Full fix: migrate all posts to use `draftProgress.generatedDrafts`.
+
+3. **Compose flow sometimes shows thoughts stage instead of drafts** — Resume logic runs
+   in a `useEffect` that fires when `draftProgress` and `generatedRevisions` resolve.
+   If those queries arrive in the wrong order or after `initializedRef` is already set,
+   the stage won't be correctly restored.
+
+4. **"Turn this into a draft" can fail if Convex validator mismatch** — If the dev and
+   prod Convex deployments are out of sync, the client sends args that don't match the
+   deployed validator. Always run `npx convex dev --once` AND `npx convex deploy --yes`
+   after any change to `convex/` files.
+
+### ⚠️ Editor (partially working — UX broken)
+**What works:**
+- Auto-saves content as revisions (1.5s debounce)
+- Edit / Preview tab toggle (Preview renders markdown via `react-markdown`)
+- Title editing auto-saves
+- "Switch draft" button returns to compose flow
+
+**Known bugs:**
+1. **Edit mode has no markdown rendering** — The textarea shows raw markdown (`## Header`,
+   `**bold**`). Only Preview mode renders it. The user never sees formatted text while
+   typing. Needs either: a live markdown editor (e.g. `@uiw/react-md-editor` or
+   `@milkdown/kit`) or at minimum split-pane edit+preview.
+
+2. **Textarea is too small by default** — The content textarea has no auto-resize and
+   users must scroll within it. The title textarea auto-resizes (uses `scrollHeight`)
+   but the content textarea does not. Add the same pattern.
+
+3. **No word count or reading time in editor** — Users want to see "850 words · 4 min read"
+   while writing.
+
+4. **No unsaved indicator that's reliable** — The `SaveStatus` component shows "saving" /
+   "saved" but if the user types quickly and navigates away, the debounced save may not
+   fire in time. No "unsaved changes" warning on navigation.
+
+### ⚠️ Review (implemented but broken UX)
+**What was attempted:**
+- Two AI personas (Craft, Truth) run in parallel and return JSON feedback items
+- Feedback shown in a side panel inside the editor
+- "Got it" streams the fixed article back via Convex `streamContent` field
+- "Skip" dismisses the item
+
+**Known bugs:**
+1. **"Got it" rewrites the ENTIRE article** — This is by design in `applyReviewFix`:
+   the AI receives the full article + one issue + suggestion and returns the full modified
+   article. This is expensive, slow, and often changes more than just the targeted fix.
+   Better approach: surgical patch (find+replace the affected sentence/paragraph only).
+
+2. **Review only processes one item at a time** — Can't apply multiple fixes concurrently.
+   The `applyingItemId` lock blocks all other items while one fix streams. Items should
+   be processable independently.
+
+3. **Streaming UI is janky** — The streaming editor replaces the textarea while the AI
+   writes. When streaming finishes, the textarea snaps back. The transition is abrupt.
+
+4. **Review panel UI is small and cramped** — The `review-side-panel` uses a fixed width
+   that may overflow or be too narrow on smaller screens. Not responsive.
+
+5. **Review runs accumulate** — Every time the user clicks "Review this draft", a new
+   `reviewRun` is created. Old runs and their items persist. There's no UI to see or
+   manage past runs. The editor only shows the most recent completed run.
+
+6. **No re-review after making edits** — After applying fixes, if the user edits the
+   article manually, there's no obvious way to trigger a fresh review (the button says
+   "View review" and just opens the old panel). Should detect content changes and offer
+   a fresh review.
+
+7. **Review page (`/app/[postId]/review`) exists but is orphaned** — There's a "Full
+   review page →" link in the panel footer but the review page UI was not fully
+   updated to match the new review data model. May render incorrectly.
+
+### ❌ Freshness scan (structurally implemented, results unreliable)
+**What was attempted:**
+- Uses Anthropic's built-in `web_search_20250305` tool — no external API key needed
+- Single API call; Anthropic executes searches server-side
+- Results saved to `freshnessUpdates` table with severity / suggestedAction / sourceLinks
+
+**Known issues:**
+1. **Freshness results have no UI on the editor page** — After scanning, results are saved
+   to the DB but there's no indicator in the editor showing that freshness issues were found.
+   Results are only visible on the (non-functional) review page.
+
+2. **`web_search_20250305` availability is not guaranteed** — This is a beta Anthropic
+   tool. If the model or account tier doesn't support it, the call silently falls back
+   to the model's training knowledge, which may hallucinate version numbers.
+
+3. **No way for the user to act on freshness results** — The schema has
+   `approve / dismiss / snooze` actions but there's no UI that surfaces them.
+
+### ❌ Settings (partially implemented)
+**What works:**
+- AI model selector — saves `preferredModel` to `users` table, all AI actions read it
+
+**What's broken:**
+1. **Writing profile display is read-only** — The settings page shows the writing profile
+   that was set during onboarding but the user can't edit it. No way to update preferences
+   without re-doing onboarding.
+
+2. **Onboarding can be re-triggered from settings** — There's no link/button to do this.
+
+3. **No usage stats** — No dashboard showing tokens used per generation, cost estimates,
+   or API call history. This requires storing `usage.input_tokens` / `usage.output_tokens`
+   from each Anthropic API response (already available in the response object — just not
+   being saved).
 
 ---
 
-## Summary / Priority Order
+## AI Prompting Issues
 
-| # | Task | Effort | Impact |
-|---|------|--------|--------|
-| 1 | Markdown rendering + fix em-dashes | Medium | High — content looks broken without it |
-| 2 | Remove scrollbar | Small | Medium — quick polish win |
-| 3 | Redesign draft cards + back navigation | Medium | High — core UX flow |
-| 4 | Settings: remove watchlist, add model selector | Medium | Medium — user control |
-| 5 | Review feedback applies changes + inline UI | Large | High — the biggest UX improvement |
-| 6 | Web search for freshness scan | Medium | Medium — correctness improvement |
+All AI calls are in `convex/ai.ts`. Current state:
 
-Recommended order: 2 → 1 → 3 → 4 → 5 → 6
-(Start with the quick win, then fix content rendering, then the core flows, then the bigger rethink.)
+### ❌ No prompt caching
+Anthropic's prompt caching (`cache_control: { type: "ephemeral" }`) is not implemented.
+Every call sends the full context. For long articles, this wastes tokens and slows
+response times. The writing profile and system prompt are identical across calls and
+are prime caching candidates.
+
+### ❌ No token tracking
+`response.usage.input_tokens` and `response.usage.output_tokens` are available on every
+Anthropic response but are not saved anywhere. No way to see cost or usage per action.
+To fix: add a `tokenUsage` table and log every AI call's usage there.
+
+### ❌ formattingAvoid not fully honored
+`writingProfile.formattingAvoid` (set during onboarding) is partially wired in
+`composeDrafts` but not in `runReview` or `applyReviewFix`. The review AI may still
+introduce forbidden patterns.
+
+### ⚠️ Em-dash handling (attempted, not fully tested)
+`composeDrafts` has explicit `NEVER use em-dashes` instruction if `formattingAvoid`
+includes `"em-dashes"`. Not verified end-to-end. Other actions (`runReview`,
+`applyReviewFix`) don't check `formattingAvoid` at all.
+
+### ❌ No structured logging UI
+AI logs appear in the Convex dashboard (`console.log` statements in action handlers).
+There's no in-app log viewer. Developers must open the Convex dashboard to see what
+the AI generated, what errors occurred, and how long each action took.
+URL: https://dashboard.convex.dev → select project → Functions → Logs
+
+### ❌ JSON parse fragility
+`parseJson()` in `convex/ai.ts` has a recovery heuristic that tries to fix truncated
+JSON from the AI. It works sometimes. When it fails, the entire action throws and the
+user sees a generic error. The `composeDrafts` action retries up to 3 times with
+`max_tokens: 20000` to avoid truncation but this is expensive.
+
+---
+
+## Security Issues
+
+### ❌ No server-side user ownership validation
+Convex queries and mutations take `userId` as a plain argument from the client.
+There's no server-side check that the authenticated user matches the `userId` being
+passed. This means a user could pass another user's `userId` to read or modify their
+posts. Fix: use `ctx.auth.getUserIdentity()` in each mutation/query to validate the
+caller.
+
+### ❌ Post access is not scoped to owner
+`getPost({ postId })` returns any post regardless of which user is logged in.
+No authorization check.
+
+---
+
+## Database Schema Notes
+
+All tables are in `convex/schema.ts`.
+
+| Table | Purpose | Notes |
+|---|---|---|
+| `users` | Auth + writing profile + preferred model | Extended from `@convex-dev/auth` authTables |
+| `posts` | Post metadata + draftProgress | `draftProgress` is a JSON blob — can get out of sync |
+| `revisions` | Content snapshots | Every save creates a new row. No cleanup/pruning. |
+| `reviewRuns` | Review session metadata | Accumulates indefinitely — no cleanup |
+| `reviewItems` | Individual feedback items | Linked to `reviewRuns` by `runId` |
+| `freshnessUpdates` | Freshness scan results | No UI to surface these |
+| `taskProgress` | Streaming progress + streamContent | Used for live AI streaming to UI |
+| `settings` | Version watchlist (unused) | Watchlist UI was removed; table stays |
+
+### draftProgress object (lives on `posts` table)
+```typescript
+{
+  roughInput?: string;          // user's raw notes
+  clarifyingQuestions?: any;    // AI-generated questions array
+  clarifyingAnswers?: any;      // user's answers
+  draftChosen?: boolean;        // true = user selected a draft, show editor
+  generatedDrafts?: any;        // array of {content, titleSuggestion} — new field
+}
+```
+**Warning**: `generatedDrafts` was added mid-development. Existing posts in the DB
+don't have it. The UI has a fallback to `getGeneratedDrafts` (revisions query) for
+legacy posts, but that fallback has the duplicate-content bug described above.
+
+---
+
+## Known Missing Features (not attempted at all)
+
+1. **Tags / categories** — Schema has `tags: string[]` on posts but no UI to set them
+2. **Post visibility (public/private)** — Schema has `visibility` field, `publishPost`
+   sets it, but there's no public-facing read route (`/posts/[slug]`) to serve published posts
+3. **Collaboration** — Single-user only; no sharing, no team workspaces
+4. **Export** — No way to export a post as Markdown, HTML, or PDF
+5. **Import** — No way to import existing posts from other platforms
+6. **Version history UI** — Revisions are saved but no UI to browse or restore them
+7. **Mobile layout** — App has a sidebar-based layout that doesn't adapt to mobile.
+   Sidebar overlaps content on narrow viewports.
+8. **Dark mode** — CSS vars exist for theming but no dark mode toggle
+9. **Keyboard shortcuts** — None implemented
+10. **Undo/redo for AI fixes** — When "Got it" applies a fix, there's no undo button.
+    The previous revision is saved in the `revisions` table but there's no UI to restore it.
+
+---
+
+## Recommended Fix Order for Next Dev
+
+Priority is based on impact on core user flow (write → review → publish):
+
+| Priority | Issue | Effort | Where |
+|---|---|---|---|
+| P0 | Editor textarea doesn't auto-resize | Small | `post-editor.tsx` |
+| P0 | Edit mode shows raw markdown (no rendering) | Medium | `post-editor.tsx`, add md editor lib |
+| P0 | "Got it" rewrites full article instead of targeted patch | Large | `convex/ai.ts:applyReviewFix` |
+| P1 | Review panel: allow processing multiple items without lock | Medium | `post-editor.tsx` |
+| P1 | Server-side user ownership checks on all mutations | Medium | `convex/posts.ts`, `convex/reviews.ts` etc. |
+| P1 | Token usage logging + settings page display | Medium | `convex/ai.ts`, new `tokenUsage` table |
+| P1 | Writing profile editable in settings (not just onboarding) | Medium | `src/app/app/settings/page.tsx` |
+| P2 | Freshness results surfaced in editor UI | Medium | `post-editor.tsx` or new component |
+| P2 | Prompt caching on system prompts and writing profile | Small | `convex/ai.ts` |
+| P2 | formattingAvoid in runReview + applyReviewFix | Small | `convex/ai.ts` |
+| P2 | Migrate legacy posts to use `draftProgress.generatedDrafts` | Small | One-time Convex migration script |
+| P3 | Mobile responsive layout | Large | `globals.css`, layout components |
+| P3 | Public post view route | Medium | New `src/app/posts/[slug]/page.tsx` |
+| P3 | Revision history browser in editor | Medium | New component + revisions query |
+
+---
+
+## File Map (start here when picking up the codebase)
+
+```
+sync-blogs-v2/
+├── convex/                        # All backend logic (Convex serverless)
+│   ├── schema.ts                  # All table definitions — read this first
+│   ├── ai.ts                      # All Anthropic API calls (compose, review, freshness, fix)
+│   ├── posts.ts                   # Post CRUD + draftProgress + deletePost (cascade)
+│   ├── revisions.ts               # Content revision snapshots
+│   ├── reviews.ts                 # Review runs and items
+│   ├── freshness.ts               # Freshness update records
+│   ├── taskProgress.ts            # Streaming progress state
+│   ├── users.ts                   # User profile + preferred model
+│   └── auth.config.ts             # @convex-dev/auth configuration
+│
+├── src/
+│   ├── app/
+│   │   ├── app/
+│   │   │   ├── [postId]/
+│   │   │   │   ├── page.tsx       # Route: shows ThoughtsInput OR PostEditor
+│   │   │   │   └── review/
+│   │   │   │       └── page.tsx   # Review page (mostly orphaned — see review bugs)
+│   │   │   ├── settings/
+│   │   │   │   └── page.tsx       # Settings: model selector + writing profile (read-only)
+│   │   │   └── page.tsx           # /app root — redirects or shows first post
+│   │   ├── onboarding/
+│   │   │   └── page.tsx           # Writing profile setup (multi-step)
+│   │   └── globals.css            # All custom CSS — Tailwind + CSS vars + component classes
+│   │
+│   ├── components/
+│   │   ├── compose/
+│   │   │   ├── thoughts-input.tsx # Stage manager: thoughts → clarify → drafts
+│   │   │   ├── clarify-questions.tsx
+│   │   │   └── draft-options.tsx  # 3 draft cards with select button
+│   │   ├── editor/
+│   │   │   └── post-editor.tsx    # Main editor: textarea + review side panel + streaming
+│   │   ├── layout/
+│   │   │   ├── sidebar.tsx        # Post list, new post, delete, filter, settings link
+│   │   │   └── app-shell.tsx      # Sidebar + main content layout
+│   │   └── publish/
+│   │       └── publish-dialog.tsx # Publish modal (visibility selector)
+│   │
+│   └── lib/
+│       ├── constants.ts           # PERSONAS, PRIORITY_LABELS, POST_STATUSES
+│       └── onboarding-questions.ts # All onboarding step definitions
+```
