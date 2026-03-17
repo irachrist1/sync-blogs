@@ -71,6 +71,9 @@ export const generateClarifyingQuestions = action({
     writingProfile: v.optional(v.any()),
   },
   handler: async (_ctx, args) => {
+    console.log("[clarify] Starting clarifying questions generation");
+    console.log("[clarify] Input length:", args.roughInput.length, "chars");
+    console.log("[clarify] Has writing profile:", !!args.writingProfile);
     const client = getClient();
     const model = getModel();
 
@@ -102,6 +105,10 @@ export const generateClarifyingQuestions = action({
       ],
     });
 
+    const rawText = readText(response);
+    console.log("[clarify] Response length:", rawText.length, "chars");
+    console.log("[clarify] Stop reason:", response.stop_reason);
+
     const parsed = parseJson<{
       questions: Array<{
         id: string;
@@ -109,8 +116,9 @@ export const generateClarifyingQuestions = action({
         options: string[];
         allowCustom: boolean;
       }>;
-    }>(readText(response));
+    }>(rawText);
 
+    console.log("[clarify] Parsed", parsed.questions.length, "questions");
     return parsed.questions;
   },
 });
@@ -132,6 +140,13 @@ export const composeDrafts = action({
     clarifyingAnswers: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
+    console.log("[compose] Starting draft composition");
+    console.log("[compose] Post:", args.postId, "| Title:", args.title);
+    console.log("[compose] Input length:", args.roughInput.length, "chars");
+    console.log("[compose] Mode:", args.mode ?? "all (argument + narrative + brief)");
+    console.log("[compose] Has writing profile:", !!args.writingProfile);
+    console.log("[compose] Has clarifying answers:", !!args.clarifyingAnswers);
+
     const client = getClient();
     const model = getModel();
 
@@ -197,10 +212,12 @@ export const composeDrafts = action({
       ...clarifyLines,
       "",
       "Return valid JSON only.",
-      "The JSON must be an object with key `options`, where `options` is an array of 1-3 objects.",
+      "The JSON must be an object with key `options`, where `options` is an array of EXACTLY 3 objects.",
+      "You MUST return all 3 modes — no fewer. Each draft must be a complete, well-developed article.",
       "Each option object must have: `mode`, `titleSuggestion`, `draft`.",
       "The `draft` field should NOT include the title — it should start with the first paragraph of the body.",
-      "The three supported modes are `argument`, `narrative`, and `brief`.",
+      "Each draft must be at least 800 words. Do not truncate or abbreviate.",
+      "The three required modes are `argument`, `narrative`, and `brief`.",
       "Do NOT add filler phrases like 'In conclusion' or 'It's worth noting that'.",
       "Do NOT start sentences with 'Delve' or 'In today's world'.",
       "Do NOT over-explain. Trust the reader.",
@@ -232,10 +249,14 @@ export const composeDrafts = action({
     ];
     let fullText = "";
 
+    console.log("[compose] Prompt length:", prompt.length, "chars");
+
     for (let attempt = 0; attempt < 3; attempt++) {
+      console.log(`[compose] API call attempt ${attempt + 1}/3, max_tokens: 20000`);
+
       const response = await client.messages.create({
         model,
-        max_tokens: 8000,
+        max_tokens: 20000,
         temperature: 0.7,
         system:
           "Output strict JSON only. No markdown. No explanation before or after the JSON object.",
@@ -245,15 +266,20 @@ export const composeDrafts = action({
       const chunk = readText(response);
       fullText += chunk;
 
+      console.log(`[compose] Attempt ${attempt + 1}: got ${chunk.length} chars, stop_reason: ${response.stop_reason}, usage: input=${response.usage.input_tokens} output=${response.usage.output_tokens}`);
+
       if (response.stop_reason === "end_turn") break;
 
       // If truncated, ask the model to continue
+      console.log(`[compose] Response truncated (${response.stop_reason}), requesting continuation...`);
       messages = [
         ...messages,
         { role: "assistant", content: chunk },
         { role: "user", content: "Continue the JSON from exactly where you left off." },
       ];
     }
+
+    console.log("[compose] Total response length:", fullText.length, "chars");
 
     const parsed = parseJson<{
       options: Array<{
@@ -262,6 +288,11 @@ export const composeDrafts = action({
         draft: string;
       }>;
     }>(fullText);
+
+    console.log("[compose] Parsed", parsed.options.length, "draft options");
+    for (const opt of parsed.options) {
+      console.log(`[compose]   - mode: ${opt.mode}, title: "${opt.titleSuggestion}", draft length: ${opt.draft.length} chars (~${Math.round(opt.draft.split(/\s+/).length)} words)`);
+    }
 
     await ctx.runMutation(api.taskProgress.upsertProgress, {
       postId: args.postId,
@@ -311,6 +342,10 @@ export const runReview = action({
     ),
   },
   handler: async (ctx, args) => {
+    console.log("[review] Starting review for post:", args.postId);
+    console.log("[review] Intensity:", args.intensity);
+    console.log("[review] Content length:", args.content.length, "chars");
+
     const client = getClient();
     const model = getModel();
 
@@ -370,9 +405,10 @@ export const runReview = action({
     // Run all personas in parallel
     const results = await Promise.all(
       personas.map(async (persona, idx) => {
+        console.log(`[review] Running persona: ${persona.name}`);
         const response = await client.messages.create({
           model,
-          max_tokens: 1600,
+          max_tokens: 4000,
           temperature: 0.5,
           system: [
             `You are the ${persona.name} persona in a private writing app.`,
