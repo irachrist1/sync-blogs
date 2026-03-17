@@ -599,6 +599,197 @@ Execute in this exact order to always have a working app:
 
 ---
 
+## APPENDIX A: Implementation Details NOT to Miss
+
+These are specific business logic, UI behaviors, and algorithms from the current codebase that MUST be ported. The implementation agent should reference the original files for exact code.
+
+### A.1 Review Scoring & Aggregation (`src/orchestrator/aggregate.ts`)
+
+Port this exact scoring logic into a Convex helper/utility:
+
+```
+Priority multipliers:
+  now      → 1.0
+  soon     → 0.65
+  optional → 0.4
+
+Score formula: confidence × priorityMultiplier
+
+Deduplication: normalize issue text (lowercase, trim whitespace), skip duplicates
+
+Intensity limits (max items returned):
+  gentle   → 3
+  balanced → 5
+  rigorous → 8
+
+Sort: descending by score, return top N
+```
+
+### A.2 Freshness Severity Classification (`src/freshness/severity.ts`)
+
+Port this exact classification into a Convex helper:
+
+```
+Base score: confidence × 0.6
+
+Claim type bonuses:
+  version, policy → +0.2
+  stat, price     → +0.15
+  date, other     → +0.0
+
+Traffic tier bonuses:
+  high   → +0.15
+  medium → +0.08
+  low    → +0.0
+
+Thresholds:
+  score >= 0.8 → "high"
+  score >= 0.5 → "medium"
+  else         → "low"
+
+Claim types: "version" | "date" | "stat" | "policy" | "price" | "other"
+Traffic tiers: "low" | "medium" | "high"
+```
+
+### A.3 Freshness Regex Fallback (`src/services/appService.ts` lines 504-531)
+
+If the Anthropic freshness scan fails, fall back to regex-based version detection:
+
+```
+Pattern: /\b([A-Za-z][A-Za-z0-9+\-]*)\s+(\d+\.\d+)\b/g
+
+Compare found versions against user's watchlist using semantic version comparison:
+  versionCmp(a, b): split by ".", compare each part numerically
+  If found version < watchlist version → flag as outdated
+```
+
+### A.4 Freshness Decision Types
+
+The plan's schema must support all 5 decision types (not just 3):
+```
+"approve_notice"   → Add footnote/notice to post
+"approve_addendum" → Add paragraph at end
+"open_revision"    → Rewrite section
+"dismiss"          → Ignore this finding
+"snooze"           → Revisit later
+```
+
+### A.5 Onboarding Adaptive Logic (`public/app.js` lines 54-322)
+
+The tone options in Step 2 CHANGE based on destination selected in Step 1:
+
+```
+If destination includes ONLY "linkedin":
+  Tones: "Executive-sharp", "Thought-leader", "Data-backed professional", "Warm mentor"
+
+If destination includes ONLY "twitter":
+  Tones: "Punchy hot-take", "Thread-teacher", "Dry wit", "Hype curator"
+
+If destination includes "newsletter" (any combo):
+  Tones: "Conversational friend", "Deep-dive analyst", "Opinionated curator", "Behind-the-scenes"
+
+Default (multi-destination or blog):
+  Tones: "Conversational & warm", "Sharp & opinionated", "Measured & analytical", "Playful & irreverent", "Minimal & direct"
+```
+
+Each step has `allowMultiple: true/false` controlling single vs multi-select behavior.
+
+### A.6 Clarifying Questions UI Details
+
+Each question card supports:
+- Multi-select options (pill buttons, can select multiple)
+- Optional custom text input below options (`allowCustom: true`)
+- Both selections AND custom input can coexist for the same question
+- Answers saved as: `{ questionId: [selectedOption1, selectedOption2, "custom: user typed text"] }`
+
+### A.7 Anthropic Service Details to Port
+
+**Web search tool configuration:**
+```typescript
+{ type: "web_search_20250305", max_uses: 3 }
+```
+Only used in freshness scanning.
+
+**Continuation handling:**
+The Anthropic SDK may return `stop_reason: "pause_turn"` for multi-turn responses. The code loops, accumulating text blocks, and re-sends with the accumulated context until `stop_reason: "end_turn"`. Port this loop logic.
+
+**Logging/observability:**
+Current code logs with prefixes: `[clarify]`, `[compose]`, `[review]`, `[freshness]` with elapsed time measurements. Port as `console.log` in Convex actions for debugging.
+
+### A.8 Landing Page — All 4 Mockup Views
+
+The interactive widget has 4 sidebar views that must all work:
+
+1. **New Draft** (default): Textarea with auto-typing demo + "Generate draft" button
+2. **My Drafts**: List of 5 posts with status badges (Published/Draft/In Review)
+   - "Using AI the Right Way" — Published
+   - "The New API Deep Dive" — Draft
+   - "Stop Switching Apps" — In Review
+   - "Why I Stopped Using Templates" — Published
+   - "Draft: Thread on Tooling" — Draft
+3. **Writing Profile**: Displays tone, hook style, sentence length, formatting preferences, 94% accuracy badge
+4. **Freshness**: 4 articles with green/yellow/red status dots and "last checked" timestamps
+
+### A.9 Landing Page Animations & Responsive
+
+**Animation timings (port to Tailwind/CSS):**
+```css
+Scroll reveal:       0.75s cubic-bezier(0.16, 1, 0.3, 1), translate Y 40px→0
+View fade:           0.25s cubic-bezier(0.16, 1, 0.3, 1)
+Generate shimmer:    1.8s linear infinite (green gradient sweep)
+CTA shimmer:         1.5s linear infinite
+Cursor blink:        0.85s step-end infinite
+Panel slide-in:      0.3s cubic-bezier(0.16, 1, 0.3, 1)
+Dot bounce (yellow): scale(0.8) → scale(1) with 0.15s transition
+```
+
+**5 responsive breakpoints:**
+```
+940px  → Testimonials: 3 columns → 2 columns
+768px  → Hero mockup: 2-column grid → 1-column, sidebar hidden
+700px  → Nav: inline links → hamburger toggle
+600px  → Typography scales down, testimonials → 1 column
+Fluid  → clamp() for hero heading, section titles
+```
+
+**Grid layouts:**
+```
+Personalization section: 1fr 1fr, 88px gap, items alternate with CSS order property
+Testimonials: repeat(3, 1fr) → repeat(2, 1fr) → 1fr
+How-it-works steps: alternating left/right with grid
+```
+
+### A.10 Publish Flow Details
+
+- Publish modal has TWO separate buttons: "Publish Private" and "Publish Public"
+- Publishing sets `status: "published"`, `publishedAt: timestamp`, clears draft progress
+- After publish, the editor's action button changes from "Review this draft" → "Check freshness"
+- Post visibility stored as `"private" | "public"` enum
+
+### A.11 Post State Transitions
+
+```
+new post     → status: "draft", visibility: "private"
+publish      → status: "published", visibility: chosen, publishedAt: now
+archive      → status: "archived"
+
+Editor button label logic:
+  if status === "draft"     → "Review this draft"
+  if status === "published" → "Check freshness"
+```
+
+### A.12 Draft Progress Persistence (Cross-Device)
+
+With Convex this becomes automatic (reactive queries), but ensure:
+- `draftProgress` field on posts table stores: `roughInput`, `clarifyingQuestions`, `clarifyingAnswers`
+- When selecting a post, restore the correct UI state based on what progress exists:
+  - Has roughInput only → show thoughts-state
+  - Has clarifyingQuestions → show clarify-state
+  - Has revisions → show editor-state
+- Auto-save rough input on every keystroke (debounced 800ms) via Convex mutation
+
+---
+
 ## Environment Setup Checklist
 
 ```bash
@@ -625,11 +816,15 @@ ANTHROPIC_MODEL=claude-sonnet-4-6
 
 ## Success Criteria
 
-1. Sign up/sign in works — no data loss on redeploy
-2. Full compose flow: thoughts → clarify → drafts → editor
-3. AI review with 5 personas
-4. Freshness scanning
-5. Real-time progress on generate/review buttons
-6. Landing page with all interactive features
-7. Mobile responsive
-8. Deployed on Vercel + Convex cloud
+1. Sign up/sign in works — no data loss on redeploy (Clerk persistent auth)
+2. Onboarding wizard with all 11 steps, adaptive tone logic
+3. Full compose flow: thoughts → clarify (with multi-select + custom input) → 3 draft options → editor
+4. AI review with 5 personas, correct scoring/aggregation, intensity-based limits
+5. Freshness scanning with regex fallback, all 5 decision types
+6. Real-time progress on generate/review buttons (Convex reactive, not fake timers)
+7. Cross-device draft persistence (automatic with Convex)
+8. Landing page with ALL interactive features (4 mockup views, dot animations, typing, responsive at 5 breakpoints)
+9. Mobile responsive on all app screens (especially clarify questions page)
+10. Publish flow with private/public visibility, post state transitions
+11. Settings: writing profile summary, version watchlist, runtime status, redo onboarding
+12. Deployed on Vercel + Convex cloud
