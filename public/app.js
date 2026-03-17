@@ -1497,12 +1497,19 @@ function setButtonLoading(btn, loading) {
 async function init() {
   if (state.token) {
     try {
-      const result = await api("/v1/auth/me");
+      const headers = {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${state.token}`,
+      };
+      const res = await fetch("/v1/auth/me", { headers });
+      if (!res.ok) throw new Error("invalid");
+      const result = await res.json();
       state.user = result.user;
       afterAuth();
     } catch (err) {
-      // Token invalid
+      // Token invalid or expired — silently redirect to auth
       state.token = null;
+      state.user = null;
       localStorage.removeItem("sync_token");
       showScreen("auth");
     }
