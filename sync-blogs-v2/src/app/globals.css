@@ -157,7 +157,10 @@
 
 .rough-input {
   width: 100%;
-  min-height: 260px;
+  min-height: 180px;
+  /* height is driven by JS auto-resize */
+  overflow: hidden;
+  resize: none;
   padding: 20px;
   border: 1px solid var(--color-line);
   border-radius: 12px;
@@ -165,7 +168,6 @@
   font-size: 1rem;
   line-height: 1.75;
   color: var(--color-ink);
-  resize: vertical;
   outline: none;
   transition: border-color 200ms cubic-bezier(0.25, 0.1, 0.25, 1);
   font-family: "Manrope", system-ui, sans-serif;

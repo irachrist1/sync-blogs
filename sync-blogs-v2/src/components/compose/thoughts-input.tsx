@@ -19,6 +19,8 @@ export function ThoughtsInput({ postId, post }: ThoughtsInputProps) {
   const { user } = useCurrentUser();
 
   const draftProgress = useQuery(api.posts.getDraftProgress, { postId });
+  // Fallback for existing posts that don't have generatedDrafts in draftProgress yet
+  const generatedRevisions = useQuery(api.revisions.getGeneratedDrafts, { postId });
   const saveDraftProgress = useMutation(api.posts.saveDraftProgress);
   const generateClarify = useAction(api.ai.generateClarifyingQuestions);
   const composeDrafts = useAction(api.ai.composeDrafts);
@@ -43,19 +45,46 @@ export function ThoughtsInput({ postId, post }: ThoughtsInputProps) {
   const [elapsed, setElapsed] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const initializedRef = useRef(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea to fit content
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = el.scrollHeight + "px";
+  }, [roughInput]);
 
   // Sync from Convex on load — resume at the right stage
   useEffect(() => {
     if (initializedRef.current) return;
-    if (draftProgress === undefined) return; // still loading
+    // Wait for both queries to resolve before initialising
+    if (draftProgress === undefined || generatedRevisions === undefined) return;
 
     const storedDrafts = draftProgress?.generatedDrafts as
       | Array<{ content: string; titleSuggestion?: string }>
       | undefined;
 
-    // Resume at draft selection only if drafts are stored and no draft has been chosen yet
+    // Primary: drafts stored in draftProgress (new approach)
     if (storedDrafts && storedDrafts.length > 0 && !draftProgress?.draftChosen) {
       setDrafts(storedDrafts);
+      setStage("drafts");
+      initializedRef.current = true;
+      return;
+    }
+
+    // Fallback: legacy posts that had drafts stored in the revisions table only
+    // (posts generated before generatedDrafts field was added)
+    if (
+      generatedRevisions.length > 0 &&
+      !draftProgress?.draftChosen &&
+      (!storedDrafts || storedDrafts.length === 0)
+    ) {
+      const legacyDrafts = generatedRevisions.map((r) => ({
+        content: r.content,
+        titleSuggestion: r.titleSuggestion,
+      }));
+      setDrafts(legacyDrafts);
       setStage("drafts");
       initializedRef.current = true;
       return;
@@ -77,7 +106,7 @@ export function ThoughtsInput({ postId, post }: ThoughtsInputProps) {
     }
     initializedRef.current = true;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [draftProgress]);
+  }, [draftProgress, generatedRevisions]);
 
   // Timer for elapsed seconds during generation
   useEffect(() => {
@@ -254,10 +283,12 @@ export function ThoughtsInput({ postId, post }: ThoughtsInputProps) {
       </h2>
 
       <textarea
+        ref={textareaRef}
         value={roughInput}
         onChange={(e) => setRoughInput(e.target.value)}
         placeholder="Paste your notes, bullet points, voice memo transcript, half-formed arguments — anything. The messier the better."
         className="rough-input"
+        rows={6}
       />
 
       <div className="thoughts-footer">
