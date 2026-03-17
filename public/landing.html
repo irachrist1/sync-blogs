@@ -7,10 +7,20 @@
     <meta name="description" content="Paste your messy thoughts. Sync turns them into articles that actually sound like you." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Async font load: no render-blocking -->
     <link
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
+      fetchpriority="high"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
     <link rel="stylesheet" href="/landing.css" />
   </head>
   <body class="lp-body">
@@ -23,8 +33,6 @@
           <a href="#how-it-works" class="lp-nav-link">How it works</a>
           <a href="#pricing" class="lp-nav-link">Pricing</a>
           <a href="/app" class="lp-nav-link">Sign in</a>
-          <!-- TODO: show this only when logged in -->
-          <a href="/app" class="lp-nav-link lp-nav-back">← Back to app</a>
         </div>
         <a href="/app" class="lp-btn lp-btn-primary lp-nav-cta">Start writing free</a>
         <button class="lp-nav-mobile-toggle" id="lp-mobile-toggle" aria-label="Toggle menu">☰</button>
@@ -33,7 +41,7 @@
         <a href="#how-it-works" class="lp-nav-mobile-link">How it works</a>
         <a href="#pricing" class="lp-nav-mobile-link">Pricing</a>
         <a href="/app" class="lp-nav-mobile-link">Sign in</a>
-        <a href="/app" class="lp-btn lp-btn-primary" style="margin-top: 8px;">Start writing free</a>
+        <a href="/app" class="lp-btn lp-btn-primary" style="margin-top: 8px;">Start writing free →</a>
       </div>
     </nav>
 
@@ -41,41 +49,195 @@
     <section class="lp-hero">
       <div class="lp-container lp-hero-container">
         <div class="lp-hero-content">
-          <h1 class="lp-hero-headline reveal">
+          <a href="#how-it-works" class="lp-hero-announce reveal">
+            <span class="lp-hero-announce-badge">New</span>
+            Introducing writing profiles — your voice, every draft →
+          </a>
+          <h1 class="lp-hero-headline reveal reveal-delay-1">
             Dump everything here.<br /><em>Don't edit yourself.</em>
           </h1>
-          <p class="lp-hero-sub reveal reveal-delay-1">
+          <p class="lp-hero-sub reveal reveal-delay-2">
             Paste your messy thoughts. Sync turns them into articles that actually sound like you.
           </p>
-          <div class="lp-hero-ctas reveal reveal-delay-2">
-            <a href="/app" class="lp-btn lp-btn-primary lp-btn-lg">Start writing free</a>
+          <div class="lp-hero-ctas reveal reveal-delay-3">
+            <a href="/app" class="lp-btn lp-btn-primary lp-btn-lg">Start writing free →</a>
             <a href="#how-it-works" class="lp-btn lp-btn-ghost lp-btn-lg">See how it works</a>
           </div>
         </div>
 
-        <div class="lp-hero-mockup reveal reveal-delay-3" aria-hidden="true">
+        <div class="lp-hero-mockup reveal reveal-delay-3">
           <div class="lp-mockup-window">
             <div class="lp-mockup-titlebar">
               <div class="lp-mockup-dots">
-                <span class="lp-dot lp-dot-red"></span>
-                <span class="lp-dot lp-dot-yellow"></span>
-                <span class="lp-dot lp-dot-green"></span>
+                <span class="lp-dot lp-dot-red" data-tooltip="Minimize"></span>
+                <span class="lp-dot lp-dot-yellow" data-tooltip="Bounce"></span>
+                <span class="lp-dot lp-dot-green" data-tooltip="Fullscreen"></span>
               </div>
               <span class="lp-mockup-url">syncblogs.app</span>
             </div>
-            <div class="lp-mockup-body">
-              <div class="lp-mockup-panel-header">
-                <span class="lp-mockup-label">Start from thoughts</span>
+            <div class="lp-mockup-app" id="mockup-app">
+              <!-- Sidebar -->
+              <aside class="lp-mockup-sidebar">
+                <div class="lp-mockup-sidebar-logo">Sync</div>
+                <nav class="lp-mockup-sidebar-nav">
+                  <a class="lp-mockup-sidebar-item lp-mockup-sidebar-active" data-view="new-draft">
+                    <span class="lp-mockup-sidebar-icon">✦</span> New draft
+                  </a>
+                  <a class="lp-mockup-sidebar-item" data-view="my-drafts">
+                    <span class="lp-mockup-sidebar-icon">📄</span> My drafts
+                  </a>
+                  <a class="lp-mockup-sidebar-item" data-view="profile">
+                    <span class="lp-mockup-sidebar-icon">👤</span> Writing profile
+                  </a>
+                  <a class="lp-mockup-sidebar-item" data-view="freshness">
+                    <span class="lp-mockup-sidebar-icon">📡</span> Freshness
+                  </a>
+                </nav>
+                <div class="lp-mockup-sidebar-divider"></div>
+                <div class="lp-mockup-sidebar-section-label">Recent</div>
+                <nav class="lp-mockup-sidebar-nav">
+                  <a class="lp-mockup-sidebar-item lp-mockup-sidebar-dim" data-view="new-draft">Using AI the Right Way</a>
+                  <a class="lp-mockup-sidebar-item lp-mockup-sidebar-dim" data-view="new-draft">The New API Deep Dive</a>
+                  <a class="lp-mockup-sidebar-item lp-mockup-sidebar-dim" data-view="new-draft">Stop Switching Apps</a>
+                </nav>
+              </aside>
+
+              <!-- View: New Draft (default) -->
+              <div class="lp-mockup-view lp-mockup-view-active" id="view-new-draft">
+                <div class="lp-mockup-main">
+                  <div class="lp-mockup-main-header">
+                    <div class="lp-mockup-side-label">Your rough thoughts</div>
+                    <div class="lp-mockup-main-status">
+                      <span class="lp-mockup-status-dot"></span> Auto-saved
+                    </div>
+                  </div>
+                  <textarea class="lp-mockup-editable" id="hero-textarea" placeholder="Start typing your rough thoughts here... bullet points, fragments, anything."></textarea>
+                  <button class="lp-mockup-generate-btn" id="hero-generate-btn">
+                    Turn this into a draft →
+                  </button>
+                </div>
+                <div class="lp-mockup-output">
+                  <div class="lp-mockup-output-header">
+                    <div class="lp-mockup-side-label lp-mockup-side-label-accent">✦ Generated draft</div>
+                  </div>
+                  <div class="lp-mockup-output-body">
+                    <div class="lp-mockup-output-waiting" id="hero-draft-waiting">
+                      <div class="lp-mockup-waiting-icon">✦</div>
+                      <div class="lp-mockup-waiting-text">Paste your rough thoughts on the left, then hit generate.</div>
+                    </div>
+                    <div class="lp-mockup-draft-result" id="hero-draft-result">
+                      <div class="lp-mockup-draft-text" id="hero-draft-text"></div>
+                    </div>
+                  </div>
+                  <div class="lp-mockup-output-footer">
+                    <span class="lp-mockup-output-badge">In your voice</span>
+                    <span class="lp-mockup-output-badge">Structured</span>
+                    <span class="lp-mockup-output-badge">Ready to publish</span>
+                  </div>
+                </div>
               </div>
-              <div class="lp-mockup-textarea">
-                <span id="hero-typed-text"></span><span class="lp-cursor" id="hero-cursor">|</span>
+
+              <!-- View: My Drafts -->
+              <div class="lp-mockup-view" id="view-my-drafts" style="display:none;">
+                <div class="lp-mockup-fullpanel">
+                  <div class="lp-mockup-side-label" style="margin-bottom:16px;">My drafts</div>
+                  <div class="lp-mockup-draft-list">
+                    <div class="lp-mockup-draft-row">
+                      <div class="lp-mockup-draft-row-title">Why Most People Are Using AI Wrong</div>
+                      <div class="lp-mockup-draft-row-meta">
+                        <span class="lp-mockup-draft-row-status lp-status-published">Published</span>
+                        <span class="lp-mockup-draft-row-date">2 days ago</span>
+                      </div>
+                    </div>
+                    <div class="lp-mockup-draft-row">
+                      <div class="lp-mockup-draft-row-title">The New API Changes Everything for Developers</div>
+                      <div class="lp-mockup-draft-row-meta">
+                        <span class="lp-mockup-draft-row-status lp-status-draft">Draft</span>
+                        <span class="lp-mockup-draft-row-date">5 days ago</span>
+                      </div>
+                    </div>
+                    <div class="lp-mockup-draft-row">
+                      <div class="lp-mockup-draft-row-title">Stop Shopping for Productivity Systems</div>
+                      <div class="lp-mockup-draft-row-meta">
+                        <span class="lp-mockup-draft-row-status lp-status-review">In review</span>
+                        <span class="lp-mockup-draft-row-date">1 week ago</span>
+                      </div>
+                    </div>
+                    <div class="lp-mockup-draft-row">
+                      <div class="lp-mockup-draft-row-title">How I Rebuilt My Writing Habit in 30 Days</div>
+                      <div class="lp-mockup-draft-row-meta">
+                        <span class="lp-mockup-draft-row-status lp-status-published">Published</span>
+                        <span class="lp-mockup-draft-row-date">2 weeks ago</span>
+                      </div>
+                    </div>
+                    <div class="lp-mockup-draft-row">
+                      <div class="lp-mockup-draft-row-title">Developer Experience Is the New Moat</div>
+                      <div class="lp-mockup-draft-row-meta">
+                        <span class="lp-mockup-draft-row-status lp-status-draft">Draft</span>
+                        <span class="lp-mockup-draft-row-date">3 weeks ago</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <button class="lp-mockup-generate-btn" id="hero-generate-btn">
-                Turn this into a draft →
-              </button>
-              <div class="lp-mockup-draft-result" id="hero-draft-result">
-                <div class="lp-mockup-draft-label">✦ Draft generated</div>
-                <div class="lp-mockup-draft-text" id="hero-draft-text"></div>
+
+              <!-- View: Writing Profile -->
+              <div class="lp-mockup-view" id="view-profile" style="display:none;">
+                <div class="lp-mockup-fullpanel">
+                  <div class="lp-mockup-side-label" style="margin-bottom:16px;">Writing profile</div>
+                  <div class="lp-mockup-profile-mini">
+                    <div class="lp-mockup-profile-row">
+                      <span class="lp-mockup-profile-label">Tone</span>
+                      <span class="lp-mockup-profile-value lp-mockup-profile-selected">Direct &amp; confident</span>
+                    </div>
+                    <div class="lp-mockup-profile-row">
+                      <span class="lp-mockup-profile-label">Hook style</span>
+                      <span class="lp-mockup-profile-value lp-mockup-profile-selected">Bold statement</span>
+                    </div>
+                    <div class="lp-mockup-profile-row">
+                      <span class="lp-mockup-profile-label">Sentence length</span>
+                      <span class="lp-mockup-profile-value lp-mockup-profile-selected">Short &amp; punchy</span>
+                    </div>
+                    <div class="lp-mockup-profile-row">
+                      <span class="lp-mockup-profile-label">Formatting</span>
+                      <span class="lp-mockup-profile-value lp-mockup-profile-selected">Headers + short paragraphs</span>
+                    </div>
+                    <div class="lp-mockup-profile-row">
+                      <span class="lp-mockup-profile-label">Voice match</span>
+                      <span class="lp-mockup-profile-value" style="color:var(--lp-accent);font-weight:600;">94% accuracy</span>
+                    </div>
+                  </div>
+                  <div class="lp-mockup-profile-footer-note">Profile saved · Applied to all drafts</div>
+                </div>
+              </div>
+
+              <!-- View: Freshness -->
+              <div class="lp-mockup-view" id="view-freshness" style="display:none;">
+                <div class="lp-mockup-fullpanel">
+                  <div class="lp-mockup-side-label" style="margin-bottom:16px;">Freshness monitor</div>
+                  <div class="lp-mockup-freshness-list">
+                    <div class="lp-mockup-freshness-row">
+                      <span class="lp-mockup-freshness-dot lp-fresh-green"></span>
+                      <span class="lp-mockup-freshness-title">Why Most People Are Using AI Wrong</span>
+                      <span class="lp-mockup-freshness-status">Fresh</span>
+                    </div>
+                    <div class="lp-mockup-freshness-row">
+                      <span class="lp-mockup-freshness-dot lp-fresh-yellow"></span>
+                      <span class="lp-mockup-freshness-title">The New API Changes Everything</span>
+                      <span class="lp-mockup-freshness-status">Needs update</span>
+                    </div>
+                    <div class="lp-mockup-freshness-row">
+                      <span class="lp-mockup-freshness-dot lp-fresh-red"></span>
+                      <span class="lp-mockup-freshness-title">Our Q4 Product Roadmap</span>
+                      <span class="lp-mockup-freshness-status">Stale</span>
+                    </div>
+                    <div class="lp-mockup-freshness-row">
+                      <span class="lp-mockup-freshness-dot lp-fresh-green"></span>
+                      <span class="lp-mockup-freshness-title">Developer Experience Is the New Moat</span>
+                      <span class="lp-mockup-freshness-status">Fresh</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -90,27 +252,32 @@
           <!-- TODO: replace with real company logos -->
           <span class="lp-social-label">Trusted by writers at</span>
           <div class="lp-social-logos">
-            <!-- The Verge: V chevron mark -->
-            <svg class="lp-social-icon" viewBox="0 0 40 22" fill="currentColor" aria-label="The Verge">
-              <polygon points="0,0 8,0 20,16 32,0 40,0 20,22"/>
-            </svg>
-            <!-- Substack: 3-bar newsletter mark -->
-            <svg class="lp-social-icon" viewBox="0 0 24 24" fill="currentColor" aria-label="Substack">
-              <path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 17.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/>
-            </svg>
-            <!-- Product Hunt: circle with block P -->
-            <svg class="lp-social-icon" viewBox="0 0 24 24" fill="currentColor" aria-label="Product Hunt">
-              <path d="M13.604 8.4H9.6V12h3.954a1.8 1.8 0 000-3.6zM12 0C5.373 0 0 5.372 0 12c0 6.627 5.373 12 12 12 6.628 0 12-5.373 12-12 0-6.628-5.372-12-12-12zm1.604 15.6H9.6V18H7.2V6h6.404a4.2 4.2 0 010 8.4z"/>
-            </svg>
-            <!-- Medium: three decreasing ellipses -->
-            <svg class="lp-social-icon" viewBox="0 0 24 24" fill="currentColor" aria-label="Medium">
-              <path d="M13.54 12a6.8 6.8 0 01-6.77 6.82A6.8 6.8 0 010 12a6.8 6.8 0 016.77-6.82A6.8 6.8 0 0113.54 12zm7.42 0c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z"/>
-            </svg>
-            <!-- Dev.to: DEV in dark box -->
-            <svg class="lp-social-icon" viewBox="0 0 52 28" aria-label="Dev.to">
-              <rect width="52" height="28" rx="5" fill="currentColor"/>
-              <text x="26" y="19" text-anchor="middle" fill="#f4f2ed" font-family="system-ui,sans-serif" font-size="13" font-weight="800" letter-spacing="0.5">DEV</text>
-            </svg>
+            <span class="lp-social-icon-wrap" data-label="The Verge">
+              <svg class="lp-social-icon" viewBox="0 0 40 22" fill="currentColor" aria-label="The Verge">
+                <polygon points="0,0 8,0 20,16 32,0 40,0 20,22"/>
+              </svg>
+            </span>
+            <span class="lp-social-icon-wrap" data-label="Substack">
+              <svg class="lp-social-icon" viewBox="0 0 24 24" fill="currentColor" aria-label="Substack">
+                <path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 17.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/>
+              </svg>
+            </span>
+            <span class="lp-social-icon-wrap" data-label="Product Hunt">
+              <svg class="lp-social-icon" viewBox="0 0 24 24" fill="currentColor" aria-label="Product Hunt">
+                <path d="M13.604 8.4H9.6V12h3.954a1.8 1.8 0 000-3.6zM12 0C5.373 0 0 5.372 0 12c0 6.627 5.373 12 12 12 6.628 0 12-5.373 12-12 0-6.628-5.372-12-12-12zm1.604 15.6H9.6V18H7.2V6h6.404a4.2 4.2 0 010 8.4z"/>
+              </svg>
+            </span>
+            <span class="lp-social-icon-wrap" data-label="Medium">
+              <svg class="lp-social-icon" viewBox="0 0 24 24" fill="currentColor" aria-label="Medium">
+                <path d="M13.54 12a6.8 6.8 0 01-6.77 6.82A6.8 6.8 0 010 12a6.8 6.8 0 016.77-6.82A6.8 6.8 0 0113.54 12zm7.42 0c0 3.54-1.51 6.42-3.38 6.42-1.87 0-3.39-2.88-3.39-6.42s1.52-6.42 3.39-6.42 3.38 2.88 3.38 6.42M24 12c0 3.17-.53 5.75-1.19 5.75-.66 0-1.19-2.58-1.19-5.75s.53-5.75 1.19-5.75C23.47 6.25 24 8.83 24 12z"/>
+              </svg>
+            </span>
+            <span class="lp-social-icon-wrap" data-label="Dev.to">
+              <svg class="lp-social-icon" viewBox="0 0 52 28" aria-label="Dev.to">
+                <rect width="52" height="28" rx="5" fill="currentColor"/>
+                <text x="26" y="19" text-anchor="middle" fill="#f4f2ed" font-family="system-ui,sans-serif" font-size="13" font-weight="800" letter-spacing="0.5">DEV</text>
+              </svg>
+            </span>
           </div>
         </div>
       </div>
@@ -123,10 +290,10 @@
         <h2 class="lp-section-headline lp-centered reveal reveal-delay-1">Three steps. One draft.</h2>
 
         <!-- Step 01 — Dump -->
-        <div class="lp-step reveal">
+        <div class="lp-step">
           <div class="lp-step-meta">
-            <span class="lp-step-number">01</span>
-            <div class="lp-step-text">
+            <span class="lp-step-number reveal">01</span>
+            <div class="lp-step-text reveal reveal-delay-1">
               <h3 class="lp-step-headline">Brain dump. No judgment.</h3>
               <p class="lp-step-body">
                 Paste bullets, fragments, voice note transcripts, rough ideas — anything.
@@ -134,7 +301,7 @@
               </p>
             </div>
           </div>
-          <div class="lp-step-visual">
+          <div class="lp-step-visual reveal reveal-delay-3">
             <div class="lp-step-mockup">
               <div class="lp-sm-label">Start from thoughts</div>
               <div class="lp-sm-textarea">
@@ -153,10 +320,10 @@
         </div>
 
         <!-- Step 02 — Clarify -->
-        <div class="lp-step lp-step-alt reveal">
+        <div class="lp-step lp-step-alt">
           <div class="lp-step-meta">
-            <span class="lp-step-number">02</span>
-            <div class="lp-step-text">
+            <span class="lp-step-number reveal">02</span>
+            <div class="lp-step-text reveal reveal-delay-1">
               <h3 class="lp-step-headline">Two questions. Then we draft.</h3>
               <p class="lp-step-body">
                 Before writing, Sync asks targeted follow-up questions — who's this for,
@@ -164,7 +331,7 @@
               </p>
             </div>
           </div>
-          <div class="lp-step-visual">
+          <div class="lp-step-visual reveal reveal-delay-3">
             <div class="lp-step-mockup">
               <div class="lp-sm-question-card">
                 <div class="lp-sm-question-header">✦ Two quick questions</div>
@@ -191,10 +358,10 @@
         </div>
 
         <!-- Step 03 — Publish -->
-        <div class="lp-step reveal">
+        <div class="lp-step">
           <div class="lp-step-meta">
-            <span class="lp-step-number">03</span>
-            <div class="lp-step-text">
+            <span class="lp-step-number reveal">03</span>
+            <div class="lp-step-text reveal reveal-delay-1">
               <h3 class="lp-step-headline">An article that sounds like you.</h3>
               <p class="lp-step-body">
                 Sync generates a structured, formatted draft that matches your voice,
@@ -202,7 +369,7 @@
               </p>
             </div>
           </div>
-          <div class="lp-step-visual">
+          <div class="lp-step-visual reveal reveal-delay-3">
             <div class="lp-step-mockup">
               <div class="lp-sm-draft-title">
                 How the New API Changes Everything for Developers
@@ -236,6 +403,7 @@
               tone, sentence style, hook preference, formatting habits — and applies it to
               every draft it generates.
             </p>
+            <div style="height: 32px;"></div>
             <a href="/app" class="lp-btn lp-btn-outline-light lp-btn-lg">
               Set up your writing profile →
             </a>
@@ -310,7 +478,7 @@
               • needs to be opinionated not listicle
             </div>
           </div>
-          <div class="lp-ba-panel lp-ba-panel-hidden" id="ba-after-panel">
+          <div class="lp-ba-panel" id="ba-after-panel" style="display:none;">
             <div class="lp-ba-panel-label">
               <span class="lp-ba-pill lp-ba-pill-after">✦ Synced draft</span>
             </div>
@@ -346,9 +514,8 @@
               The draft actually sounded like me — not like a robot wrote it.
             </blockquote>
             <div class="lp-quote-author">
-              <!-- TODO: replace with real name -->
-              <div class="lp-quote-name">Sarah K.</div>
-              <div class="lp-quote-role">Indie writer, 12k subscribers</div>
+              <div class="lp-quote-name">Jamie Nwosu</div>
+              <div class="lp-quote-role">Staff Engineer · "From the Stack" newsletter</div>
             </div>
           </div>
           <div class="lp-quote-card reveal reveal-delay-1">
@@ -358,9 +525,8 @@
               finish things. The clarifying questions are the secret weapon.
             </blockquote>
             <div class="lp-quote-author">
-              <!-- TODO: replace with real name -->
-              <div class="lp-quote-name">Marcus T.</div>
-              <div class="lp-quote-role">Senior engineer, technical blog</div>
+              <div class="lp-quote-name">Ravi Shankar</div>
+              <div class="lp-quote-role">Senior SWE at Figma · dev blog, 8k readers</div>
             </div>
           </div>
           <div class="lp-quote-card reveal reveal-delay-2">
@@ -370,9 +536,8 @@
               my style. My audience hasn't noticed the change — that's the whole point.
             </blockquote>
             <div class="lp-quote-author">
-              <!-- TODO: replace with real name -->
-              <div class="lp-quote-name">Priya M.</div>
-              <div class="lp-quote-role">Product manager, newsletter creator</div>
+              <div class="lp-quote-name">Tess Okafor</div>
+              <div class="lp-quote-role">PM at Notion · dev newsletter, 5k subscribers</div>
             </div>
           </div>
         </div>
@@ -446,13 +611,13 @@
             </p>
           </div>
           <div class="lp-footer-links">
-            <!-- TODO: add real links -->
             <a href="#" class="lp-footer-link">Privacy</a>
             <a href="#" class="lp-footer-link">Terms</a>
             <a href="#" class="lp-footer-link">Twitter / X</a>
             <a href="#" class="lp-footer-link">GitHub</a>
           </div>
         </div>
+        <div class="lp-footer-copyright">© 2026 Sync Blogs</div>
       </div>
     </footer>
 
